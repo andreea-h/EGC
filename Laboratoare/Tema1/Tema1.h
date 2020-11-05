@@ -50,4 +50,6 @@ class Tema1 : public SimpleScene {
 		bool s_pressed = false;
 		float moveBallon;
 		std::vector<float> translateY_values = {}; //valorile translatiilor pe oY ale baloanelor
+		
+		float angularStep;
 };

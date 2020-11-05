@@ -26,7 +26,8 @@ void Tema1::Init() {
 	camera->Update();
 	GetCameraInput()->SetActive(false);
 
-	Mesh* shuriken = CreateShuriken(30);
+	shurikenSide = 30;
+	Mesh* shuriken = CreateShuriken(shurikenSide);
 	AddMeshToList(shuriken);
 
 	Mesh* arrow = CreateArrow(5, 20);
@@ -41,6 +42,7 @@ void Tema1::Init() {
 	Mesh* redBallon = CreateBallon('r', 30);
 	AddMeshToList(redBallon);
 
+	//retine coordonate pentre viitoarele translatii de baloane si shurikene
 	int i;
 	for (i = 0; i < 10; i++) {
 		translateY_values.push_back(0 - 200 * i);
@@ -205,16 +207,18 @@ Mesh* Tema1::CreateBallon(char color, float R) {
 
 void Tema1::Update(float deltaTimeSeconds) {
 	int i;
+	angularStep += 3 * deltaTimeSeconds;
 	for (i = 0; i < 10; i++) {
 		translateY_values[i] += 250 * deltaTimeSeconds;
 		if (translateY_values[i] > window->GetResolution().y + 600) {
 			translateY_values[i] = - 1200;
 		}
 	}
+
 	modelMatrixArrow = glm::mat3(1);
 	modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
 	modelMatrixArrow *= Transform2D::Rotate(radiusArrow);
-	modelMatrixArrow *= Transform2D::Scale(2.0f, 2.0f);
+	modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
 	
 	//recalculeaza coordonatele varfului sagetii
 	arrowTop = glm::vec3(arrowLength + modelMatrixArrow[2][0], 720 - modelMatrixArrow[2][1], 0);
@@ -223,12 +227,9 @@ void Tema1::Update(float deltaTimeSeconds) {
 	modelMatrixBow = glm::mat3(1);
 	modelMatrixBow *= Transform2D::Translate(50, 250 + translateY);
 	modelMatrixBow *= Transform2D::Rotate(radiusArrow);
-	modelMatrixBow *= Transform2D::Scale(2.0f, 2.0f);
+	modelMatrixBow *= Transform2D::Scale(0.85f, 0.85f);
 	RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixBow);
 
-	modelMatrixShuriken = glm::mat3(1);
-	modelMatrixShuriken *= Transform2D::Translate(800, 250);
-	RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
 	//////////////////////////////////////////////////////////////////////////////
 	
 	for (i = 0; i < 10; i++) {
@@ -258,60 +259,39 @@ void Tema1::Update(float deltaTimeSeconds) {
 		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
 		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
 	}
+	for (i = 0; i < 3; i++) {
+		modelMatrixShuriken = glm::mat3(1);
+		//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
+		modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 200 * i, 250);
+		modelMatrixShuriken *= Transform2D::Translate(-50 * angularStep, 100 * i);
+		modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
+		modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
+		RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
+	}
 
-	/*
-		//se calculeaza random distantele dintre baloane
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1200, moveBallon);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
+	for (i = 0; i < 3; i++) {
+		modelMatrixShuriken = glm::mat3(1);
+		//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
+		modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 400 * i, 250);
+		modelMatrixShuriken *= Transform2D::Translate(-50 * angularStep, 100 * i);
+		modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
+		modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
+		RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
+	}
 
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1000, moveBallon);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1000, moveBallon - 300);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["redBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1200, moveBallon - 200);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1100, moveBallon - 100);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["redBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(900, moveBallon - 400);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["redBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1000, moveBallon - 500);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1250, moveBallon - 600);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
-
-		modelMatrixBallonY = glm::mat3(1);
-		modelMatrixBallonY *= Transform2D::Translate(1000, moveBallon - 700);
-		modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
-		RenderMesh2D(meshes["yellowBallon"], shaders["VertexColor"], modelMatrixBallonY);
-*/
-	/*modelMatrixBallonR = glm::mat3(1);
-	modelMatrixBallonR *= Transform2D::Translate(1200, 250);
-	modelMatrixBallonR *= Transform2D::Scale(1, 1.25f);
-	modelMatrixBallonR *= Transform2D::Scale(0.85f, 0.85f);
-	RenderMesh2D(meshes["redBallon"], shaders["VertexColor"], modelMatrixBallonR);*/
+	for (i = 0; i < 3; i++) {
+		modelMatrixShuriken = glm::mat3(1);
+		//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
+		modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 400 * i, 650);
+		modelMatrixShuriken *= Transform2D::Translate(-50 * angularStep, 100 * i);
+		modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
+		modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
+		RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
+	}
 	
+	if (50 * angularStep >= window->GetResolution().x + 800) {
+		angularStep = 0;
+	}
 }
 
 void Tema1::FrameStart() {
@@ -329,11 +309,11 @@ void Tema1::FrameEnd() {
 void Tema1::OnInputUpdate(float deltaTime, int mods)
 {
 	if (window->KeyHold(GLFW_KEY_S)) {
-		translateY -= deltaTime * 100;
+		translateY -= deltaTime * 300;
 	}
 
 	if (window->KeyHold(GLFW_KEY_W)) {
-		translateY += deltaTime * 100;
+		translateY += deltaTime * 300;
 	}
 }
 
