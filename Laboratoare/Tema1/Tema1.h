@@ -60,8 +60,10 @@ class Tema1 : public SimpleScene {
 		float angularStep;
 		float powerFactor = 1; //cu cat este scalat dreptunghiul powerBar pe oX
 		bool mouseClick; //este true atata timp cat este apasat mouse-ul
-		clock_t mouseClickTime; //retine timpul cat este apasat mouse-ul
+		float mouseClickTime; //retine timpul cat este apasat mouse-ul
 		bool throwArrow; //este true la mouseBtnRelease (cand trebuie lansata sageata)
 		glm::vec2 mousePos;
 		glm::vec2 arrowTranslateMove; //translatiile pe x si y ale sagetii
+
+		float throwAngle; //unghiul 
 };
