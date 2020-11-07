@@ -25,9 +25,10 @@ class Tema1 : public SimpleScene {
 		Mesh* CreateRectangle(); //dreptunghi folosit pentru a afisa puterea de tragere 
 		void LoadBallons();
 		void LoadShuriken();
-		void checkYellBallonCollision(); //intoarce true daca exista coliziune balon-sageata
+		void checkBallonCollision(); //intoarce true daca exista coliziune balon-sageata
 		void GeneratePos();
 		void GenerateBallonPos();
+		void GenerateBallonColor();
 
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -70,9 +71,15 @@ class Tema1 : public SimpleScene {
 
 		float throwAngle; //unghiul aruncarii sagetii = unghiul pe care sageata il face cu axa Ox pe directia aruncarii
 
+		//to do //delete
 		std::vector<glm::mat3> yellowBallonsPos = std::vector<glm::mat3>(30); //retine pozitiile pentru cele 30 de baloane care 
+		std::vector<glm::vec2> initialBallonPos = std::vector<glm::vec2>(8);
 
-		std::vector<glm::vec2> initialBallonPos = std::vector<glm::vec2>(8); //pozitiile initiale ale baloanelor
-		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(8); //culorile date prin 1-rosu, 0-galben, generate aleator
+
+		std::vector<glm::vec2> ballonPos = std::vector<glm::vec2>(240); //pozitiile baloanelor actualizate la fiecare nou cadru
+		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(240); //culorile date prin 1-rosu, 0-galben, generate aleator
+		std::vector<unsigned short> collisionMem = std::vector<unsigned short>(240); //retine -1 pe indicii asociati baloanelor are au avut coliziune cu sageata
+		std::vector<float> scaleFactors = std::vector<float>(240); //factoriii de scalare pentru baloane in cazul coliziunilor
 		float translateBallonStep;
+		float removeX = 0;
 };
