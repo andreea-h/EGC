@@ -52,7 +52,7 @@ void Tema1::Init() {
 	Mesh* powerBar = CreateRectangle();
 	AddMeshToList(powerBar);
 
-	GenerateBallonColor(); //genereaza aleator culorile pentru cele 240 baloane
+	GenerateBallonColor(); //genereaza aleator culorile pentru cele 180 baloane
 }
 
 Mesh* Tema1::CreateRectangle() {
@@ -106,7 +106,7 @@ Mesh* Tema1::CreateShuriken(float shurikenSide) {
 	glm::vec3 color = glm::vec3(0.600, 0.196, 0.800);
 	vector<VertexFormat> vertices =
 	{
-		VertexFormat(glm::vec3(0, 0, 0), color),
+		VertexFormat(glm::vec3(0, 0, 0), glm::vec3(0.878, 1.000, 1.000)),
 		VertexFormat(glm::vec3(-1, 1, 0) * shurikenSide, color),
 		VertexFormat(glm::vec3(0, 1, 0) * shurikenSide, color),
 		VertexFormat(glm::vec3(1, 1, 0) * shurikenSide, color),
@@ -235,14 +235,14 @@ Mesh* Tema1::CreateBallon(char color, float R) {
 void Tema1::checkShurikenColl() {
 	int i;
 	bool ok = false;
-	for (i = 0; i < 60; i++) {
+	for (i = 0; i < 120; i++) {
 		//verifica coliziunea doar pentru shiriken-ele vizibile in fereastra
 		if (shurikenPos[i].x >= 0 && shurikenPos[i].x <= window->GetResolution().x) {
 			if (collisionMemShuriken[i] != 1) { //daca nu s-a produs deja coliziune
 				float posX = shurikenPos[i].x;
 				float posY = shurikenPos[i].y;
 				if (powf(arrowTop.x - posX, 2.0f) + powf(arrowTop.y - posY, 2.0f) <
-					powf(shurikenSide * sqrt(2), 2.0)) {
+					powf(shurikenSide * sqrt(2) * 0.75f, 2.0)) {
 					collisionMemShuriken[i] = 1;
 					score += 15;
 					ok = true;
@@ -251,7 +251,7 @@ void Tema1::checkShurikenColl() {
 		}
 	}
 	if (ok == true) {
-		cout << "Scorul este: " << score << endl;
+		cout << "Scorul este: " << score << " puncte :)" << endl;
 	}
 }
 
@@ -260,14 +260,14 @@ void Tema1::checkBallonCollision() {
 	//verifica daca varful sagetii este inclus in cercul incadrator al unui dintre baloanele 
 	int i;
 	bool newScore = false;
-	for (i = 0; i < 240; i++) {
+	for (i = 0; i < 180; i++) {
 		if (ballonPos[i].y <= window->GetResolution().y) {
 			if (collisionMem[i] != 1) { //daca nu s-a mai produs coliziune pana la acest moment
 				float xBallon = ballonPos[i].x;
 				float yBallon = ballonPos[i].y;
 				//(x - center_x)^2 + (y - center_y)^2 < radius^2
 				if (powf(arrowTop.x - xBallon, 2.0f) + powf(arrowTop.y - yBallon, 2.0f) <
-					powf((ballonRadius + 20) * 1.25f, 2.0)) {
+					powf((ballonRadius  + 10)* 1.25f, 2.0)) {
 					//coliziune sageata balon
 					//std::cout << glm::to_string() << std::endl;
 					collisionMem[i] = 1;
@@ -289,7 +289,7 @@ void Tema1::checkBallonCollision() {
 		}
 	}
 	if (newScore == true) { //s-a actualizat scorul
-		cout << "Scorul este: " << score << endl;
+		cout << "Scorul este: " << score << " puncte :)" << endl;
 	}
 }
 
@@ -298,13 +298,13 @@ void Tema1::checkBallonCollision() {
 bool Tema1::checkBallonPos() {
 	int i;
 	int count = 0;
-	for (i = 0; i < 240; i++) {
+	for (i = 0; i < 180; i++) {
 		float posY = ballonPos[i].y;
-		if (posY >= window->GetResolution().y || collisionMem[i] == 1) { 
+		if ((posY >= window->GetResolution().y + 100) || collisionMem[i] == 1) { 
 			count++;
 		}
 	}
-	if (count == 240) {
+	if (count == 180) {
 		return true;
 	}
 	return false;
@@ -312,12 +312,12 @@ bool Tema1::checkBallonPos() {
 
 void Tema1::LoadShuriken() {
 	int i;
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 20; i++) {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
 			
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 200 * i, 80 + i * 30); //ok
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 200 * i, 200 + i * 20); //ok
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -327,11 +327,11 @@ void Tema1::LoadShuriken() {
 		}
 		
 	}
-	for (i = 10; i < 20; i++) {
+	for (i = 20; i < 40; i++) {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 10) + 200, 750 - i * 10); //ok
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 20) + 200, 750 - i * 10); //ok
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -341,7 +341,7 @@ void Tema1::LoadShuriken() {
 		}
 		
 	}
-	for (i = 20; i < 30; i++) { //ultimul set de shurikene care devine vizibil in fereastra
+	for (i = 40; i < 60; i++) { //ultimul set de shurikene care devine vizibil in fereastra
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
@@ -355,11 +355,11 @@ void Tema1::LoadShuriken() {
 		}
 		
 	}
-	for (i = 30; i < 40; i++) {
+	for (i = 60; i < 80; i++) {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 30) + 50, 800 - i * 10);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 60) + 50, 900 - i * 10);
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -369,11 +369,11 @@ void Tema1::LoadShuriken() {
 		}
 	}
 
-	for (i = 40; i < 50; i++) {
+	for (i = 80; i < 100; i++) {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 40) + 2000, 800 - i * 10);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 80) + 2000, 300 - i);
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -383,11 +383,11 @@ void Tema1::LoadShuriken() {
 		}
 	}
 
-	for (i = 50; i < 60; i++) {
+	for (i = 100; i < 120; i++) {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 50) + 2000, 700 - i * 10);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 100) + 2000, 700 - i);
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -401,7 +401,7 @@ void Tema1::LoadShuriken() {
 void Tema1::GenerateBallonColor() {
 	int i;
 	srand(time(NULL));
-	for (i = 0; i < 240; i++) {
+	for (i = 0; i < 180; i++) {
 		unsigned short colorRandom = rand() % 2;
 		ballonColor[i] = colorRandom; // 1-rosu, 0-galben
 	}
@@ -409,7 +409,7 @@ void Tema1::GenerateBallonColor() {
 
 void Tema1::LoadBallons(float deltaTimeSeconds) {
 	int i;
-	for (i = 0; i < 80; i++) { //baloanele apar in 3 coloane => 240 baloane
+	for (i = 0; i < 90; i++) { //baloanele apar in 3 coloane => 90 baloane total
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
 			modelMatrixBallonY *= Transform2D::Translate(800, -200 * i - 100);
@@ -442,10 +442,10 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		}
 	}
 
-	for (i = 80; i < 160; i++) {
+	for (i = 90; i < 150; i++) {
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 80) - 300);
+			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 90) - 300);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep);
 			modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
 			if (ballonColor[i] == 1) {
@@ -460,7 +460,7 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		else { //efect de animatie la distrugerea balonului
 			scaleFactors[i] += 0.5 * deltaTimeSeconds;
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 80) - 300);
+			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 90) - 300);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep - 150 * deltaTimeSeconds);
 			modelMatrixBallonY *= Transform2D::Scale(1 - scaleFactors[i], 1.25f - scaleFactors[i]);
 			if (1 - scaleFactors[i] > 0) {
@@ -474,10 +474,10 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		}
 	}
 
-	for (i = 160; i < 240; i++) {
+	for (i = 150; i < 180; i++) {
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 160) - 500);
+			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 150) - 500);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep);
 			modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
 			if (ballonColor[i] == 1) {
@@ -493,7 +493,7 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		else { //efect de animatie la distrugerea balonului
 			scaleFactors[i] += 0.5 * deltaTimeSeconds;
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 160) - 500);
+			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 150) - 500);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep - 150 * deltaTimeSeconds);
 			modelMatrixBallonY *= Transform2D::Scale(1 - scaleFactors[i], 1.25f - scaleFactors[i]);
 			if (1 - scaleFactors[i] > 0) {
@@ -509,74 +509,100 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 }
 
 void Tema1::Update(float deltaTimeSeconds) {
-	int i;
-	translateBallonStep += 1500 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
-	
-	bool check = checkBallonPos();
-	if (check == false) {
-		LoadBallons(deltaTimeSeconds);
-	}
-	else {
-		angularStep += 9 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
-		LoadShuriken();
-	}
-	//aruncare sageata
-	if (throwArrow == true) {
-		arrowTranslateMove.x += (1000 * mouseClickTime) * deltaTimeSeconds;
-		arrowTranslateMove.y += (1000 * mouseClickTime) * deltaTimeSeconds;
-		modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
-		//translatare pe directia pozitiei mouse-ului la momentul mouseBtnRelease
-		
-		modelMatrixArrow *= Transform2D::Translate(arrowTranslateMove.x * cosf(throwAngle),
-			arrowTranslateMove.x * sinf(throwAngle));
-		modelMatrixArrow *= Transform2D::Rotate(throwAngle); //unghiul sub care se arunca sageata este unghiul translatiei la momentul mouseBtnRelease
-		
-		modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
-		RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
-	}
-	else {
-		//sageata este afisata ca atasata arcului si orientata mereu dupa directia mouse-ului
-		modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
-		modelMatrixArrow *= Transform2D::Rotate(radiusArrow);
-		modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
-		RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
-	}
-	//recalculeaza coordonatele varfului sagetii
-	float arrowTopX = modelMatrixArrow[2][0] + modelMatrixArrow[1][0] + modelMatrixArrow[0][0];
-	float arrowTopY = modelMatrixArrow[2][1] + modelMatrixArrow[1][1] + modelMatrixArrow[0][1];
-	if (radiusArrow != 0) {
-		arrowTopX += arrowLength * cosf(radiusArrow);
-		arrowTopY += arrowLength * sinf(radiusArrow);
-	}
-	else { 
-		arrowTopX += arrowLength; //daca radiusArrow == 0 nu exista proiectie pe axa OY
-	}
-	arrowTop = glm::vec3(arrowTopX, arrowTopY, 0);
-	//////////////////////////////////////////////////////////////////////////////
-	modelMatrixBow = glm::mat3(1);
-	modelMatrixBow *= Transform2D::Translate(100, 250 + translateY);
-	modelMatrixBow *= Transform2D::Rotate(radiusArrow);
-	modelMatrixBow *= Transform2D::Scale(0.85f, 0.85f);
-	RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixBow);
+	if (livesCount > 0) {
+		int i;
+		translateBallonStep += 100 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
 
-	//////////////////////////////////////////////////////////////////////////////
-	//se afiseaza dreptunghiul scalat in functie de apasarea mouse-ului
-	if (mouseClick == true) {
-		modelMatrixPower = glm::mat3(1);
-		modelMatrixPower *= Transform2D::Translate(100, 10);
-		powerFactor += 0.09f;
-		modelMatrixPower *= Transform2D::Translate(30, 90 + translateY);
-		modelMatrixPower *= Transform2D::Scale(1 + powerFactor, 1);
-		RenderMesh2D(meshes["powerBar"], shaders["VertexColor"], modelMatrixPower);
+		bool check = checkBallonPos();
+		if (check == false) {
+			LoadBallons(deltaTimeSeconds);
+		}
+		else {
+			angularStep += 5 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
+			LoadShuriken();
+		}
+		//aruncare sageata
+		if (throwArrow == true) {
+			arrowTranslateMove.x += (1000 * mouseClickTime) * deltaTimeSeconds;
+			arrowTranslateMove.y += (1000 * mouseClickTime) * deltaTimeSeconds;
+			modelMatrixArrow = glm::mat3(1);
+			modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
+			//translatare pe directia pozitiei mouse-ului la momentul mouseBtnRelease
+
+			modelMatrixArrow *= Transform2D::Translate(arrowTranslateMove.x * cosf(throwAngle),
+				arrowTranslateMove.x * sinf(throwAngle));
+			modelMatrixArrow *= Transform2D::Rotate(throwAngle); //unghiul sub care se arunca sageata este unghiul translatiei la momentul mouseBtnRelease
+
+			modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
+			RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
+
+		}
+		else {
+			//sageata este afisata ca atasata arcului si orientata mereu dupa directia mouse-ului
+			modelMatrixArrow = glm::mat3(1);
+			modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
+			modelMatrixArrow *= Transform2D::Rotate(radiusArrow);
+			modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
+			RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
+		}
+		//recalculeaza coordonatele varfului sagetii
+		float arrowTopX = modelMatrixArrow[2][0] + modelMatrixArrow[1][0] + modelMatrixArrow[0][0];
+		float arrowTopY = modelMatrixArrow[2][1] + modelMatrixArrow[1][1] + modelMatrixArrow[0][1];
+		sageata.x = arrowTopX;
+		sageata.y = arrowTopY;
+		
+		if (radiusArrow != 0) {
+			arrowTopX += arrowLength * cosf(radiusArrow) * 0.85f;
+			arrowTopY += arrowLength * sinf(radiusArrow) * 0.85f;
+		}
+		else {
+			arrowTopX += arrowLength * 0.85f; //daca radiusArrow == 0 nu exista proiectie pe axa OY
+		}
+		arrowTop = glm::vec3(arrowTopX, arrowTopY, 0);
+		
+		//////////////////////////////////////////////////////////////////////////////
+		modelMatrixBow = glm::mat3(1);
+		modelMatrixBow *= Transform2D::Translate(100, 250 + translateY);
+		modelMatrixBow *= Transform2D::Rotate(radiusArrow);
+		modelMatrixBow *= Transform2D::Scale(0.85f, 0.85f);
+		RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixBow);
+
+		//////////////////////////////////////////////////////////////////////////////
+		//se afiseaza dreptunghiul scalat in functie de apasarea mouse-ului
+		if (mouseClick == true) {
+			modelMatrixPower = glm::mat3(1);
+			modelMatrixPower *= Transform2D::Translate(100, 10);
+			powerFactor += 0.09f;
+			modelMatrixPower *= Transform2D::Translate(30, 90 + translateY);
+			if (powerFactor >= 0.09 * 150) { //s-a atins limita maxima a vitezei
+				//se opreste si cresterea vitezei de aruncare a sagetii
+				modelMatrixPower *= Transform2D::Scale(0.09 * 150 + 1, 1);
+				maxSpeedMoment = clock();
+				maxSpeed = true;
+			}
+			else {
+				modelMatrixPower *= Transform2D::Scale(1 + powerFactor, 1);
+			}
+			RenderMesh2D(meshes["powerBar"], shaders["VertexColor"], modelMatrixPower);
+		}
+		//verifica coliziunile baloanelor cu sageata
+		if (check == false) {
+			checkBallonCollision();
+		}
+		if (check == true) {
+			checkShurikenColl();
+		}
+		//daca sageata a iesit din fereastra, va fi translatata in pozitia initiala ca fiind atasata arcului
+		if (sageata.x >= window->GetResolution().x) {
+			throwArrow = false;
+		}
+
+
 	}
-	//verifica coliziunile baloanelor cu sageata
-	if (check == false) {
-		checkBallonCollision();
-	}
-	if (check == true) {
-		checkShurikenColl();
+	else {
+		Engine::GetWindow()->Close();
+		cout << "Ai pierdut cele 3 vieti :(" << endl;
+		cout << "Scorul tau final este: " << score  <<" puncte." << endl;
 	}
 }
 
@@ -616,13 +642,18 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 	float diffX = mouseX - modelMatrixArrow[2][0] - arrowSide * cosf(radiusArrow);
 	float diffY = window->GetResolution().y - mouseY - modelMatrixArrow[2][1] - arrowSide * sinf(radiusArrow);
 	if (diffX > 0 && diffY != 0) {
-		radiusArrow = atan(diffY / diffX);
+		float temp = atan(diffY / diffX);
+		//limitam rotirea arcului si a sagetii dupa pozitia mouse-ului in intervalul [-45 gr, 45 gr]
+		if (temp >= -0.785 && temp <= 0.785) {
+			radiusArrow = temp;
+		}
 	}	
 }
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
 	mouseClick = true;
+	maxSpeed = false;
 	arrowTranslateMove.x = 0;
 	arrowTranslateMove.y = 0;
 	throwArrow = false;
@@ -631,8 +662,26 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
+	if (throwTimer == 0) { //primul MousebtnRelease
+		throwTimer = clock();
+	}
+	else {
+		float aux;
+		aux = clock() - throwTimer;
+		if (aux / 1000.0f <= 4) { //se poate arunca un arc o data la 4s
+			cout << "Mai trebuie sa astepti " << 4 - aux/1000.0f << " secunde inainte de a arunca inca a sageata :)" << endl;
+			return;
+		}
+	}
+	throwTimer = clock();
 	mouseClick = false;
-	mouseClickTime = clock() - mouseClickTime;
+	if (maxSpeed == false) { //s-a facut release inainte de a atinge limita maxima a vitezei
+		mouseClickTime = (float)(clock() - mouseClickTime); //timpul in cicli de ceas
+	}
+	else {
+		mouseClickTime = maxSpeedMoment - mouseClickTime;
+	}
+	
 	mouseClickTime = (float)mouseClickTime/1000.0f; //timpul in secunde cat s-a tinut apasat pe mouse
 	powerFactor = 0; //daca nu se mai tine apasat pe mouse, dispare powerBar
 	//trebuie sa se lanseze sageata
@@ -640,6 +689,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 	throwAngle = radiusArrow;
 	mousePos = glm::vec2(mouseX, window->GetResolution().y - mouseY); //pozitia mouse-ului in coordonate utilizator
 	//cout << "mouse: " << mousePos.x << " , " << mousePos.y << endl;
+	//cout << "varf sageata: " << arrowTop.x << ", " << arrowTop.y << endl;
+	//cout << "sageata stanga: " << sageata.x << " , " << sageata.y << endl;
 }
 
 void Tema1::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)

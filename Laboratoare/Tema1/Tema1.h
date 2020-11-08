@@ -56,7 +56,7 @@ class Tema1 : public SimpleScene {
 		glm::vec3 arrowTop; //coordonatele varfului sagetii
 
 		float translateY; //deplasarea arcului pe directie verticala
-		bool w_pressed = false; //true daca s-a apasat
+		bool w_pressed = false; //true daca s-a apasat w
 		bool s_pressed = false;
 		float moveBallon;
 		std::vector<float> translateY_values = {}; //valorile translatiilor pe oY ale baloanelor
@@ -65,6 +65,9 @@ class Tema1 : public SimpleScene {
 		float powerFactor = 1; //cu cat este scalat dreptunghiul powerBar pe oX
 		bool mouseClick; //este true atata timp cat este apasat mouse-ul
 		float mouseClickTime; //retine timpul cat este apasat mouse-ul
+		float maxSpeedMoment; //retine momentul la care s-a atins viteza maxima a sagetii
+		bool maxSpeed; //este true daca s-a atins limita maxima a vitezei
+
 		bool throwArrow; //este true la mouseBtnRelease (cand trebuie lansata sageata)
 		glm::vec2 mousePos;
 		glm::vec2 arrowTranslateMove; //translatiile pe x si y ale sagetii
@@ -77,13 +80,16 @@ class Tema1 : public SimpleScene {
 
 
 		std::vector<glm::vec2> ballonPos = std::vector<glm::vec2>(240); //pozitiile baloanelor actualizate la fiecare nou cadru
-		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(240); //culorile date prin 1-rosu, 0-galben, generate aleator
-		std::vector<unsigned short> collisionMem = std::vector<unsigned short>(240); //retine -1 pe indicii asociati baloanelor are au avut coliziune cu sageata
-		std::vector<float> scaleFactors = std::vector<float>(240); //factoriii de scalare pentru baloane in cazul coliziunilor
+		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(180); //culorile date prin 1-rosu, 0-galben, generate aleator
+		std::vector<unsigned short> collisionMem = std::vector<unsigned short>(180); //retine -1 pe indicii asociati baloanelor are au avut coliziune cu sageata
+		std::vector<float> scaleFactors = std::vector<float>(180); //factoriii de scalare pentru baloane in cazul coliziunilor
 		float translateBallonStep;
 		float removeX = 0;
 		int score; //retine scorul jucatorului
 
-		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(60); //pozitiile pentru shuriken
-		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(240);
+		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(120); //pozitiile pentru shuriken
+		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(120);
+		int livesCount = 3; //numarul de vieti al jucatorului
+		float throwTimer; //o data la 4 s este permisa aruncarea sagetii
+		glm::vec2 sageata;
 };
