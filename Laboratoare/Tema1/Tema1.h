@@ -23,12 +23,12 @@ class Tema1 : public SimpleScene {
 		Mesh* CreateBow();
 		Mesh* CreateBallon(char color, float radius); //culoare = y/r, radius = raza inainte de deformare balon
 		Mesh* CreateRectangle(); //dreptunghi folosit pentru a afisa puterea de tragere 
-		void LoadBallons();
 		void LoadShuriken();
+		void LoadBallons(float deltaTimeSeconds);
 		void checkBallonCollision(); //intoarce true daca exista coliziune balon-sageata
-		void GeneratePos();
-		void GenerateBallonPos();
 		void GenerateBallonColor();
+		bool checkBallonPos(); //intoarce 'true' daca in fereastra nu mai sunt baloane vizibile
+		void checkShurikenColl();
 
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -82,4 +82,8 @@ class Tema1 : public SimpleScene {
 		std::vector<float> scaleFactors = std::vector<float>(240); //factoriii de scalare pentru baloane in cazul coliziunilor
 		float translateBallonStep;
 		float removeX = 0;
+		int score; //retine scorul jucatorului
+
+		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(40); //pozitiile pentru shuriken
+		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(240);
 };
