@@ -29,6 +29,8 @@ class Tema1 : public SimpleScene {
 		void GenerateBallonColor();
 		bool checkBallonPos(); //intoarce 'true' daca in fereastra nu mai sunt baloane vizibile
 		void checkShurikenColl();
+		bool circleCollision(glm::vec2 centre1, glm::vec2 centre2, float radius1, float radius2);
+		void checkBowCollision();
 
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -49,6 +51,7 @@ class Tema1 : public SimpleScene {
 		glm::mat3 modelMatrixPower;
 		float shurikenSide;
 		float arrowSide;
+		float bowRadius;
 			
 		float ballonRadius;
 		float radiusArrow = 0;
@@ -79,9 +82,9 @@ class Tema1 : public SimpleScene {
 		std::vector<glm::vec2> initialBallonPos = std::vector<glm::vec2>(8);
 
 
-		std::vector<glm::vec2> ballonPos = std::vector<glm::vec2>(240); //pozitiile baloanelor actualizate la fiecare nou cadru
-		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(180); //culorile date prin 1-rosu, 0-galben, generate aleator
-		std::vector<unsigned short> collisionMem = std::vector<unsigned short>(180); //retine -1 pe indicii asociati baloanelor are au avut coliziune cu sageata
+		std::vector<glm::vec2> ballonPos = std::vector<glm::vec2>(90); //pozitiile baloanelor actualizate la fiecare nou cadru
+		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(90); //culorile date prin 1-rosu, 0-galben, generate aleator
+		std::vector<unsigned short> collisionMem = std::vector<unsigned short>(90); //retine -1 pe indicii asociati baloanelor are au avut coliziune cu sageata
 		std::vector<float> scaleFactors = std::vector<float>(180); //factoriii de scalare pentru baloane in cazul coliziunilor
 		float translateBallonStep;
 		float removeX = 0;
@@ -89,7 +92,12 @@ class Tema1 : public SimpleScene {
 
 		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(120); //pozitiile pentru shuriken
 		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(120);
+		std::vector<unsigned short> collisionMemBow = std::vector<unsigned short>(120); //memoreaza coliziunile arcului cu shuriken-ul
+		
 		int livesCount = 3; //numarul de vieti al jucatorului
 		float throwTimer; //o data la 4 s este permisa aruncarea sagetii
-		glm::vec2 sageata;
+
+		glm::vec2 sageata; //coordonatele capatului din stanga al sagetii
+		glm::vec2 bowCircleCoord; // coordonatele cercului incadrator al arcului
+
 };

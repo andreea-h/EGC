@@ -33,6 +33,7 @@ void Tema1::Init() {
 	Mesh* arrow = CreateArrow(5, 30);
 	AddMeshToList(arrow);
 
+	bowRadius = 100;
 	Mesh* bow = CreateBow();
 	AddMeshToList(bow);
 
@@ -52,7 +53,7 @@ void Tema1::Init() {
 	Mesh* powerBar = CreateRectangle();
 	AddMeshToList(powerBar);
 
-	GenerateBallonColor(); //genereaza aleator culorile pentru cele 180 baloane
+	GenerateBallonColor(); //genereaza aleator culorile pentru cele 90 baloane
 }
 
 Mesh* Tema1::CreateRectangle() {
@@ -131,12 +132,12 @@ Mesh* Tema1::CreateShuriken(float shurikenSide) {
 
 Mesh* Tema1::CreateBow() {
 	glm::vec3 color = glm::vec3(0.000, 0.000, 0.804);
-	float radius = 100;
+	
 	vector<VertexFormat> vertices;
 	float i, j;
 	int step1 = 0;
 	for (i = 0.4; i <= M_PI - 0.4; i += 0.001) {
-		vertices.push_back(VertexFormat(glm::vec3(radius * sinf(i), radius * cosf(i), 0), color));
+		vertices.push_back(VertexFormat(glm::vec3(bowRadius * sinf(i), bowRadius * cosf(i), 0), color));
 		step1++;
 	}
 	vector<unsigned short> indices;
@@ -260,7 +261,7 @@ void Tema1::checkBallonCollision() {
 	//verifica daca varful sagetii este inclus in cercul incadrator al unui dintre baloanele 
 	int i;
 	bool newScore = false;
-	for (i = 0; i < 180; i++) {
+	for (i = 0; i < 90; i++) {
 		if (ballonPos[i].y <= window->GetResolution().y) {
 			if (collisionMem[i] != 1) { //daca nu s-a mai produs coliziune pana la acest moment
 				float xBallon = ballonPos[i].x;
@@ -298,16 +299,43 @@ void Tema1::checkBallonCollision() {
 bool Tema1::checkBallonPos() {
 	int i;
 	int count = 0;
-	for (i = 0; i < 180; i++) {
+	for (i = 0; i < 90; i++) {
 		float posY = ballonPos[i].y;
 		if ((posY >= window->GetResolution().y + 100) || collisionMem[i] == 1) { 
 			count++;
 		}
 	}
-	if (count == 180) {
+	if (count == 90) {
 		return true;
 	}
 	return false;
+}
+
+//intoarce true daca cercurile date prin parametri se intersecteaza
+bool Tema1::circleCollision(glm::vec2 center1, glm::vec2 center2, float radius1, float radius2)
+{
+	float diffX = center1.x - center2.x;
+	float diffY = center1.y - center2.y;
+	float dist = sqrt(diffX * diffX + diffY * diffY);
+
+	if (dist < radius1 + radius2) { //coliziune
+		return true;
+	}
+	return false;
+}
+
+//verifica coliziunea arcului cu shurikenele
+void Tema1::checkBowCollision() {
+	int i;
+	for (i = 0; i < 120; i++) { //verifica pe rand coliziunea cu fiecare shuriken
+		bool check = circleCollision(bowCircleCoord, shurikenPos[i],
+			100 * 0.85f, shurikenSide * sqrt(2) * 0.75f);
+		if (check == true && collisionMemBow[i] == 0) {
+			livesCount -= 1;
+			collisionMemBow[i] = 1;
+			cout << "Ai pierdut o viata :( Mai ai " << livesCount << " vieti" << endl;
+		}
+	}
 }
 
 void Tema1::LoadShuriken() {
@@ -401,7 +429,7 @@ void Tema1::LoadShuriken() {
 void Tema1::GenerateBallonColor() {
 	int i;
 	srand(time(NULL));
-	for (i = 0; i < 180; i++) {
+	for (i = 0; i < 90; i++) {
 		unsigned short colorRandom = rand() % 2;
 		ballonColor[i] = colorRandom; // 1-rosu, 0-galben
 	}
@@ -409,7 +437,7 @@ void Tema1::GenerateBallonColor() {
 
 void Tema1::LoadBallons(float deltaTimeSeconds) {
 	int i;
-	for (i = 0; i < 90; i++) { //baloanele apar in 3 coloane => 90 baloane total
+	for (i = 0; i < 30; i++) { 
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
 			modelMatrixBallonY *= Transform2D::Translate(800, -200 * i - 100);
@@ -442,10 +470,10 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		}
 	}
 
-	for (i = 90; i < 150; i++) {
+	for (i = 30; i < 60; i++) {
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 90) - 300);
+			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 30) - 300);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep);
 			modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
 			if (ballonColor[i] == 1) {
@@ -460,7 +488,7 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		else { //efect de animatie la distrugerea balonului
 			scaleFactors[i] += 0.5 * deltaTimeSeconds;
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 90) - 300);
+			modelMatrixBallonY *= Transform2D::Translate(1000, -250 * (i - 30) - 300);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep - 150 * deltaTimeSeconds);
 			modelMatrixBallonY *= Transform2D::Scale(1 - scaleFactors[i], 1.25f - scaleFactors[i]);
 			if (1 - scaleFactors[i] > 0) {
@@ -474,10 +502,10 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		}
 	}
 
-	for (i = 150; i < 180; i++) {
+	for (i = 60; i < 90; i++) {
 		if (collisionMem[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 150) - 500);
+			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 60) - 500);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep);
 			modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
 			if (ballonColor[i] == 1) {
@@ -493,7 +521,7 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 		else { //efect de animatie la distrugerea balonului
 			scaleFactors[i] += 0.5 * deltaTimeSeconds;
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 150) - 500);
+			modelMatrixBallonY *= Transform2D::Translate(1200, -300 * (i - 60) - 500);
 			modelMatrixBallonY *= Transform2D::Translate(0, translateBallonStep - 150 * deltaTimeSeconds);
 			modelMatrixBallonY *= Transform2D::Scale(1 - scaleFactors[i], 1.25f - scaleFactors[i]);
 			if (1 - scaleFactors[i] > 0) {
@@ -508,10 +536,11 @@ void Tema1::LoadBallons(float deltaTimeSeconds) {
 	}
 }
 
+
 void Tema1::Update(float deltaTimeSeconds) {
 	if (livesCount > 0) {
 		int i;
-		translateBallonStep += 100 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
+		translateBallonStep += 800 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
 
 		bool check = checkBallonPos();
 		if (check == false) {
@@ -528,7 +557,6 @@ void Tema1::Update(float deltaTimeSeconds) {
 			modelMatrixArrow = glm::mat3(1);
 			modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
 			//translatare pe directia pozitiei mouse-ului la momentul mouseBtnRelease
-
 			modelMatrixArrow *= Transform2D::Translate(arrowTranslateMove.x * cosf(throwAngle),
 				arrowTranslateMove.x * sinf(throwAngle));
 			modelMatrixArrow *= Transform2D::Rotate(throwAngle); //unghiul sub care se arunca sageata este unghiul translatiei la momentul mouseBtnRelease
@@ -567,6 +595,9 @@ void Tema1::Update(float deltaTimeSeconds) {
 		modelMatrixBow *= Transform2D::Scale(0.85f, 0.85f);
 		RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixBow);
 
+		bowCircleCoord.x = modelMatrixBow[2][0] + modelMatrixBow[1][0] + modelMatrixBow[0][0];
+		bowCircleCoord.y  = modelMatrixBow[2][1] + modelMatrixBow[1][1] + modelMatrixBow[0][1];
+		//cout << bowCircleCoord.x << ", " << bowCircleCoord.y << endl;
 		//////////////////////////////////////////////////////////////////////////////
 		//se afiseaza dreptunghiul scalat in functie de apasarea mouse-ului
 		if (mouseClick == true) {
@@ -591,6 +622,7 @@ void Tema1::Update(float deltaTimeSeconds) {
 		}
 		if (check == true) {
 			checkShurikenColl();
+			checkBowCollision();
 		}
 		//daca sageata a iesit din fereastra, va fi translatata in pozitia initiala ca fiind atasata arcului
 		if (sageata.x >= window->GetResolution().x) {
@@ -622,10 +654,17 @@ void Tema1::OnInputUpdate(float deltaTime, int mods)
 {
 	if (window->KeyHold(GLFW_KEY_S)) {
 		translateY -= deltaTime * 300;
+		if (250 + translateY - bowRadius <= 0) { //verifica daca arcul nu dispare din fereastra
+			//daca arcul nu ar mai fi vizibil, ajusteaza pozitia
+			translateY += deltaTime * 300;
+		}
 	}
-
 	if (window->KeyHold(GLFW_KEY_W)) {
 		translateY += deltaTime * 300;
+		if (bowRadius + translateY + 250 >= window->GetResolution().y) { //verifica daca arcu nu dispare din fereastra
+			//daca arcul nu ar mai fi vizibil, ajusteaza pozitia
+			translateY -= deltaTime * 300;
+		}
 	}
 }
 
@@ -670,6 +709,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 		aux = clock() - throwTimer;
 		if (aux / 1000.0f <= 4) { //se poate arunca un arc o data la 4s
 			cout << "Mai trebuie sa astepti " << 4 - aux/1000.0f << " secunde inainte de a arunca inca a sageata :)" << endl;
+			mouseClick = false;
+			powerFactor = 0;
 			return;
 		}
 	}
