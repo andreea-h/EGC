@@ -84,6 +84,6 @@ class Tema1 : public SimpleScene {
 		float removeX = 0;
 		int score; //retine scorul jucatorului
 
-		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(40); //pozitiile pentru shuriken
+		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(60); //pozitiile pentru shuriken
 		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(240);
 };

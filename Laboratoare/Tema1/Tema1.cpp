@@ -235,7 +235,7 @@ Mesh* Tema1::CreateBallon(char color, float R) {
 void Tema1::checkShurikenColl() {
 	int i;
 	bool ok = false;
-	for (i = 0; i < 40; i++) {
+	for (i = 0; i < 60; i++) {
 		//verifica coliziunea doar pentru shiriken-ele vizibile in fereastra
 		if (shurikenPos[i].x >= 0 && shurikenPos[i].x <= window->GetResolution().x) {
 			if (collisionMemShuriken[i] != 1) { //daca nu s-a produs deja coliziune
@@ -316,7 +316,8 @@ void Tema1::LoadShuriken() {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 150 * i, 80);
+			
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 200 * i, 80 + i * 30); //ok
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -330,7 +331,7 @@ void Tema1::LoadShuriken() {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 200 * (i - 10), 580);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 10) + 200, 750 - i * 10); //ok
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -340,11 +341,11 @@ void Tema1::LoadShuriken() {
 		}
 		
 	}
-	for (i = 20; i < 30; i++) {
+	for (i = 20; i < 30; i++) { //ultimul set de shurikene care devine vizibil in fereastra
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 400 * (i - 20), 400);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * i + 1500,  50 + i * 5); //ok
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -358,7 +359,35 @@ void Tema1::LoadShuriken() {
 		if (collisionMemShuriken[i] != 1) {
 			modelMatrixShuriken = glm::mat3(1);
 			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
-			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 600 * (i - 30), 200);
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 30) + 50, 800 - i * 10);
+			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
+			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
+			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
+			RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
+			shurikenPos[i] = glm::vec2(modelMatrixShuriken[2][0] + modelMatrixShuriken[0][0],
+				modelMatrixShuriken[2][1] + modelMatrixShuriken[1][1]);
+		}
+	}
+
+	for (i = 40; i < 50; i++) {
+		if (collisionMemShuriken[i] != 1) {
+			modelMatrixShuriken = glm::mat3(1);
+			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 250 * (i - 40) + 2000, 800 - i * 10);
+			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
+			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
+			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
+			RenderMesh2D(meshes["shuriken"], shaders["VertexColor"], modelMatrixShuriken);
+			shurikenPos[i] = glm::vec2(modelMatrixShuriken[2][0] + modelMatrixShuriken[0][0],
+				modelMatrixShuriken[2][1] + modelMatrixShuriken[1][1]);
+		}
+	}
+
+	for (i = 50; i < 60; i++) {
+		if (collisionMemShuriken[i] != 1) {
+			modelMatrixShuriken = glm::mat3(1);
+			//la fiecare apel de update() shuriken-ul se translateaza din dreapta scenei la o pozitie din [0, window->GetResolution().x + 200)
+			modelMatrixShuriken *= Transform2D::Translate(window->GetResolution().x + 300 * (i - 50) + 2000, 700 - i * 10);
 			modelMatrixShuriken *= Transform2D::Translate(-20 * angularStep, 0); //translatia de-a lungul axei OX
 			modelMatrixShuriken *= Transform2D::Rotate(-angularStep); // genereaza rotatia in jurul propriului centru
 			modelMatrixShuriken *= Transform2D::Scale(0.75f, 0.75f);
@@ -488,10 +517,9 @@ void Tema1::Update(float deltaTimeSeconds) {
 		LoadBallons(deltaTimeSeconds);
 	}
 	else {
-		angularStep += 3 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
+		angularStep += 9 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
 		LoadShuriken();
 	}
-	
 	//aruncare sageata
 	if (throwArrow == true) {
 		arrowTranslateMove.x += (1000 * mouseClickTime) * deltaTimeSeconds;
@@ -550,7 +578,6 @@ void Tema1::Update(float deltaTimeSeconds) {
 	if (check == true) {
 		checkShurikenColl();
 	}
-	
 }
 
 void Tema1::FrameStart() {
