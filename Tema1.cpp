@@ -78,13 +78,13 @@ Mesh* Tema1::createStar() {
 	Mesh* star = new Mesh("star");
 	vector<VertexFormat> vertices =
 	{
-		VertexFormat(glm::vec3(-0.5f, 0.5f, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(-0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
 		VertexFormat(glm::vec3(0, 2, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(0.5f, 0.5f, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
 		VertexFormat(glm::vec3(2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(0.5f, -0.5f, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
 		VertexFormat(glm::vec3(0, -2, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(-0.5f, -0.5f, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(-0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
 		VertexFormat(glm::vec3(-2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
 	};
 
@@ -130,11 +130,13 @@ Mesh* Tema1::CreateHead() {
 		VertexFormat(glm::vec3(0, -20, 0), color),
 		VertexFormat(glm::vec3(20, -20, 0), color)
 	};
-	vector<unsigned short> indices =
+	
+	vector<unsigned short> indices = 
 	{
 		0, 2, 1,
 		1, 2, 3
 	};
+
 	cap_gigel->InitFromData(vertices, indices);
 	return cap_gigel;
 }
@@ -143,29 +145,33 @@ Mesh* Tema1::CreateGigel() {
 	Mesh* gigel = new Mesh("gigel");
 	glm::vec3 color = glm::vec3(0.867, 0.627, 0.867);
 	vector<VertexFormat> vertices = {
+		//incepe cu coltul din stanga sus al gatului
 		VertexFormat(glm::vec3(10, 10, 0), color),
 		VertexFormat(glm::vec3(20, 10, 0), color),
 		VertexFormat(glm::vec3(10, 0, 0), color),
 		VertexFormat(glm::vec3(20, 0, 0), color),
+
 		VertexFormat(glm::vec3(0, 0, 0), color),
 		VertexFormat(glm::vec3(30, 0, 0), color),
+		//zona picioarelor
 		VertexFormat(glm::vec3(0, -60, 0), color),
 		VertexFormat(glm::vec3(30, -60, 0), color),
 		VertexFormat(glm::vec3(0, -120, 0), color),
 		VertexFormat(glm::vec3(10, -120, 0), color),
 		VertexFormat(glm::vec3(20, -120, 0), color),
 		VertexFormat(glm::vec3(30, -120, 0), color),
+
 		VertexFormat(glm::vec3(10, -60, 0), color),
 		VertexFormat(glm::vec3(20, -60, 0), color),
-		
-		VertexFormat(glm::vec3(55, -2.5f, 0), color), //14
+		//mana 1
+		VertexFormat(glm::vec3(-20, -65, 0), color), //14
 		VertexFormat(glm::vec3(20, -30, 0), color), //15
-		VertexFormat(glm::vec3(65, -5, 0), color), //16
-		VertexFormat(glm::vec3(75, 0, 0), color),
-		VertexFormat(glm::vec3(75, -5, 0), color),
-		VertexFormat(glm::vec3(30, -5, 0), color),
+		VertexFormat(glm::vec3(-10, -65, 0), color), //16
+		//mana 2
+		VertexFormat(glm::vec3(30, -10, 0), color),
+		VertexFormat(glm::vec3(30, -45, 0), color),
+		VertexFormat(glm::vec3(20, -45, 0), color),
 
-		VertexFormat(glm::vec3(25, -15, 0), color), //20
 	};
 
 	vector<unsigned short> indices =
@@ -178,8 +184,8 @@ Mesh* Tema1::CreateGigel() {
 		12, 8, 9, 
 		13, 10, 7,
 		7, 10, 11, 
-		14, 15, 16,
-		16, 15, 20,
+		14, 15, 4,
+		4, 15, 16,
 		5, 19, 17, 
 		17, 19, 18
 	};
@@ -232,7 +238,7 @@ Mesh* Tema1::CreateGround() {
 }
 
 Mesh* Tema1::CreateRectangle() {
-	glm::vec3 color = glm::vec3(0.180, 0.545, 0.341);
+	glm::vec3 color = glm::vec3(0.196, 0.804, 0.196);
 	vector<VertexFormat> vertices =
 	{
 		VertexFormat(glm::vec3(0, 0, 0), color),
@@ -306,7 +312,7 @@ Mesh* Tema1::CreateShuriken(float shurikenSide) {
 }
 
 Mesh* Tema1::CreateBow() {
-	glm::vec3 color = glm::vec3(0.000, 0.000, 0.804);
+	glm::vec3 color = glm::vec3(0.863, 0.078, 0.235);
 	
 	vector<VertexFormat> vertices;
 	float i, j;
@@ -386,7 +392,7 @@ Mesh* Tema1::CreateBallon(char color, float R) {
 	vertices.push_back(VertexFormat(glm::vec3(-3, -R - 24, 0), color1));
 
 	int j;
-	for (j = 1; j < step; j++) {
+	for (j = 1; j <= step; j++) {
 		indices.push_back(j);
 		indices.push_back(j - 1);
 		indices.push_back(0); //"uneste" de centru 
@@ -836,7 +842,7 @@ void Tema1::LoadWindingBallons(float deltaTimeSeconds) {
 	for (i = 0; i < 20; i++) {
 		if (collisionMemWinBall[i] != 1) {
 			modelMatrixBallonY = glm::mat3(1);
-			modelMatrixBallonY *= Transform2D::Translate(800, -200 * i);
+			modelMatrixBallonY *= Transform2D::Translate(800, -150 * i);
 			
 			modelMatrixBallonY *= Transform2D::Translate(translateBallonX, translateBallonY);
 			modelMatrixBallonY *= Transform2D::Scale(1, 1.25f);
@@ -891,35 +897,44 @@ bool Tema1::checkShurikenPos() {
 
 void Tema1::Update(float deltaTimeSeconds) {
 	if (livesCount > 0) {
-		
+		glLineWidth(1.5f);
 		RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
+		//ochii lui gigel
+		modelMatrixArrow = glm::mat3(1);
+		modelMatrixArrow *= Transform2D::Translate(65, 350 + translateY);
+		modelMatrixArrow *= Transform2D::Scale(0.5f, 0.5f);
+		RenderMesh2D(meshes["eye"], shaders["VertexColor"], modelMatrixArrow);
+
+		modelMatrixArrow = glm::mat3(1);
+		modelMatrixArrow *= Transform2D::Translate(85, 350 + translateY);
+		modelMatrixArrow *= Transform2D::Scale(0.5f, 0.5f);
+		RenderMesh2D(meshes["eye"], shaders["VertexColor"], modelMatrixArrow);
+
+		//zambetul lui gigel
+		modelMatrixArrow = glm::mat3(1);
+		modelMatrixArrow *= Transform2D::Translate(81.5f, 335 + translateY);
+		modelMatrixArrow *= Transform2D::Rotate(-1.57f);
+		modelMatrixArrow *= Transform2D::Scale(0.2f, 0.15f);
+		RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixArrow);
+
 		//corpul lui gigel
-	/*	modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(50, 500);
+		modelMatrixArrow = glm::mat3(1);
+		modelMatrixArrow *= Transform2D::Translate(50, 300 + translateY);
 		modelMatrixArrow *= Transform2D::Scale(2.0f, 1.5f);
 		RenderMesh2D(meshes["gigel"], shaders["VertexColor"], modelMatrixArrow);
 		//capul lui gigel
 		modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(55, 560);
+		modelMatrixArrow *= Transform2D::Translate(55, 360 + translateY);
 		modelMatrixArrow *= Transform2D::Scale(2.5f, 2.5f);
 		RenderMesh2D(meshes["cap_gigel"], shaders["VertexColor"], modelMatrixArrow);
-
-		//ochii lui gigel
-		modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(60, 500);
-		modelMatrixArrow *= Transform2D::Scale(0.5f, 0.5f);
-		RenderMesh2D(meshes["eye"], shaders["VertexColor"], modelMatrixArrow);
-
-		modelMatrixArrow = glm::mat3(1);
-		modelMatrixArrow *= Transform2D::Translate(70, 500);
-		modelMatrixArrow *= Transform2D::Scale(0.5f, 0.5f);
-		RenderMesh2D(meshes["eye"], shaders["VertexColor"], modelMatrixArrow);
-		*/
+		
+		
+		
 
 		LoadDiamonds();
 		LoadStars();
 		int i;
-		translateBallonStep += 900 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
+		translateBallonStep += 150 * deltaTimeSeconds; //cu cat se translateaza la fiecare cadru fiecare balon pe OY
 		
 
 		bool check = checkBallonPos();
@@ -927,30 +942,16 @@ void Tema1::Update(float deltaTimeSeconds) {
 			LoadBallons(deltaTimeSeconds);
 		}
 		else {
-			//verifica daca toate shurikenele au fost facute vizibile in scena
-			//bool checkShuriken = checkShurikenPos();
-			//if (checkShuriken == false) {
-				angularStep += 5 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
-				//LoadShuriken(deltaTimeSeconds);
-				step += 150 * deltaTimeSeconds;
-				translateBallonY += 150 * deltaTimeSeconds;
-				translateBallonX += 150 * deltaTimeSeconds;
-				if (step >= 200) {
-					translateBallonX -= 150 * deltaTimeSeconds;
-				}
-				LoadWindingBallons(deltaTimeSeconds);
-				//cout << "trans: " << translateBallonStep1 << endl;
-			//}
-			//else {
-			//	LoadWindingBallons(deltaTimeSeconds);
-			//}
+			angularStep += 5 * deltaTimeSeconds; //pentru deplasarea respectiv rotirea shuriken-ului
+			LoadShuriken(deltaTimeSeconds);
+				
 		}
 		//aruncare sageata
-		if (throwArrow == true) {
+		if (throwArrow == true && specialThrow == false) {
 			arrowTranslateMove.x += (1000 * mouseClickTime) * deltaTimeSeconds;
 			arrowTranslateMove.y += (1000 * mouseClickTime) * deltaTimeSeconds;
 			modelMatrixArrow = glm::mat3(1);
-			modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
+			modelMatrixArrow *= Transform2D::Translate(110, 250 + translateY);
 			//translatare pe directia pozitiei mouse-ului la momentul mouseBtnRelease
 			modelMatrixArrow *= Transform2D::Translate(arrowTranslateMove.x * cosf(throwAngle),
 				arrowTranslateMove.x * sinf(throwAngle));
@@ -959,10 +960,24 @@ void Tema1::Update(float deltaTimeSeconds) {
 			modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
 			RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
 		}
+		else if (throwArrow == true && specialThrow == true) { //aruncarea sub unghi inclinat a sagetii
+			arrowTranslateMove.x = 70.0f * deltaTimeSeconds;
+			arrowTranslateMove.y = 70.0f * deltaTimeSeconds;
+			modelMatrixArrow = glm::mat3(1);
+			modelMatrixArrow *= Transform2D::Translate(110, 250 + translateY);
+			throwAngle -= 0.4 * deltaTimeSeconds;
+			//translatare pe directia pozitiei mouse-ului la momentul mouseBtnRelease
+			modelMatrixArrow *= Transform2D::Translate((arrowTranslateMove.x + arrowLength)* cosf(throwAngle),
+				(arrowTranslateMove.y + arrowLength) * sinf(throwAngle));
+			modelMatrixArrow *= Transform2D::Rotate(throwAngle); //unghiul sub care se arunca sageata este unghiul translatiei la momentul mouseBtnRelease
+
+			modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
+			RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
+		}
 		else {
 			//sageata este afisata ca atasata arcului si orientata mereu dupa directia mouse-ului
 			modelMatrixArrow = glm::mat3(1);
-			modelMatrixArrow *= Transform2D::Translate(100, 250 + translateY);
+			modelMatrixArrow *= Transform2D::Translate(110, 250 + translateY);
 			modelMatrixArrow *= Transform2D::Rotate(radiusArrow);
 			modelMatrixArrow *= Transform2D::Scale(0.85f, 0.85f);
 			RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrixArrow);
@@ -984,7 +999,7 @@ void Tema1::Update(float deltaTimeSeconds) {
 		
 		//////////////////////////////////////////////////////////////////////////////
 		modelMatrixBow = glm::mat3(1);
-		modelMatrixBow *= Transform2D::Translate(100, 250 + translateY);
+		modelMatrixBow *= Transform2D::Translate(90, 250 + translateY);
 		modelMatrixBow *= Transform2D::Rotate(radiusArrow);
 		modelMatrixBow *= Transform2D::Scale(0.85f, 0.85f);
 		RenderMesh2D(meshes["bow"], shaders["VertexColor"], modelMatrixBow);
@@ -1065,10 +1080,14 @@ void Tema1::OnInputUpdate(float deltaTime, int mods)
 			translateY -= deltaTime * 300;
 		}
 	}
+	if (window->KeyHold(GLFW_KEY_P)) {
+		specialThrow = true;
+	}
 }
 
 void Tema1::OnKeyPress(int key, int mods)
 {
+	
 }
 
 void Tema1::OnKeyRelease(int key, int mods)

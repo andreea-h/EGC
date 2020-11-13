@@ -121,6 +121,7 @@ class Tema1 : public SimpleScene {
 		std::vector<unsigned short> collisionMemWinBall = std::vector<unsigned short>(40);
 		
 		float translateBallonX, translateBallonY; //factorii de translatie ai baloanelor care se deplaseaza serpuit
-		float step, step1;
-		bool left = false, right = true; //indica "directiile" catre care se fac translatarile in drumul serpuit al baloanelor
+		
+
+		bool specialThrow; //este true daca se doreste aruncarea sub unchi inclinat
 };
