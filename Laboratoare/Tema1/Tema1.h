@@ -39,6 +39,9 @@ class Tema1 : public SimpleScene {
 		bool circleCollision(glm::vec2 centre1, glm::vec2 centre2, float radius1, float radius2);
 		void checkBowCollision();
 		void LoadStars();
+		bool checkShurikenPos();
+		void LoadDiamonds(float deltaTimeSeconds);
+		void checkDiamondColl();
 		
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -48,8 +51,7 @@ class Tema1 : public SimpleScene {
 		void OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) override;
 		void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		void OnWindowResize(int width, int height) override;
-		void LoadDiamonds();
-		void checkDiamondColl();
+	
 		
 
 	protected:
@@ -66,6 +68,7 @@ class Tema1 : public SimpleScene {
 			
 		float ballonRadius;
 		float radiusArrow = 0;
+		float maxBallonRadius; //raza cercului incadrator al balonului considerand si polilinia atasata acestuia
 		float arrowLength; //lungimea sagetii
 		glm::vec3 arrowTop; //coordonatele varfului sagetii
 
@@ -101,10 +104,10 @@ class Tema1 : public SimpleScene {
 		float removeX = 0;
 		int score; //retine scorul jucatorului
 
-		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(120); //pozitiile pentru shuriken
-		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(120);
-		std::vector<unsigned short> collisionMemBow = std::vector<unsigned short>(120); //memoreaza coliziunile arcului cu shuriken-ul
-		std::vector<float> scaleFactorsShuriken = std::vector<float>(120); //retine factorii de scalare pentru shurikene
+		std::vector<glm::vec2> shurikenPos = std::vector<glm::vec2>(130); //pozitiile pentru shuriken
+		std::vector<unsigned short> collisionMemShuriken = std::vector<unsigned short>(130);
+		std::vector<unsigned short> collisionMemBow = std::vector<unsigned short>(130); //memoreaza coliziunile arcului cu shuriken-ul
+		std::vector<float> scaleFactorsShuriken = std::vector<float>(130); //retine factorii de scalare pentru shurikene
 
 		int livesCount = 3; //numarul de vieti al jucatorului
 		float throwTimer; //o data la 4 s este permisa aruncarea sagetii
@@ -115,4 +118,5 @@ class Tema1 : public SimpleScene {
 		std::vector<glm::vec2> diamondsPos = std::vector<glm::vec2>(15);
 		std::vector<unsigned short> collisionMemDiamond = std::vector<unsigned short>(15); //retine daca s-a produs coliziune cu diamantele
 		
+		std::vector<float> diamondTranslateY = std::vector<float>(15); //retine deplasarea pe oy a diamantelor care au avut coliziune cu sageata
 };
