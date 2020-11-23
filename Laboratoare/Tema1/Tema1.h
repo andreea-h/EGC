@@ -18,6 +18,7 @@ class Tema1 : public SimpleScene {
 		void Update(float deltaTimeSeconds) override;
 		void FrameEnd() override;
 
+		Mesh* CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
 		Mesh* CreateShuriken(float shurikenSide);
 		Mesh* CreateArrow(float arrowSide, float lengthFactor);
 		Mesh* CreateBow();
@@ -90,11 +91,6 @@ class Tema1 : public SimpleScene {
 		glm::vec2 arrowTranslateMove; //translatiile pe x si y ale sagetii
 
 		float throwAngle; //unghiul aruncarii sagetii = unghiul pe care sageata il face cu axa Ox pe directia aruncarii
-
-		//to do //delete
-		std::vector<glm::mat3> yellowBallonsPos = std::vector<glm::mat3>(30); //retine pozitiile pentru cele 30 de baloane care 
-		std::vector<glm::vec2> initialBallonPos = std::vector<glm::vec2>(8);
-
 
 		std::vector<glm::vec2> ballonPos = std::vector<glm::vec2>(80); //pozitiile baloanelor actualizate la fiecare nou cadru
 		std::vector<unsigned short> ballonColor = std::vector<unsigned short>(80); //culorile date prin 1-rosu, 0-galben, generate aleator

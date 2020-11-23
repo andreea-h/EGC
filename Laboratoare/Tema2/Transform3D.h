@@ -9,10 +9,10 @@ namespace Transform3D
 	{
 		// TODO implement translate matrix
 		return glm::transpose(
-			glm::mat4(1, 0, 0, translateX, 
-					  0, 1, 0, translateY,
-					  0, 0, 1, translateZ,
-				      0, 0, 0, 1)
+			glm::mat4(1, 0, 0, translateX,
+				0, 1, 0, translateY,
+				0, 0, 1, translateZ,
+				0, 0, 0, 1)
 		);
 	}
 
@@ -22,9 +22,9 @@ namespace Transform3D
 		// TODO implement scale matrix
 		return glm::transpose(
 			glm::mat4(scaleX, 0, 0, 0,
-					  0, scaleY, 0, 0,
-				      0, 0, scaleZ, 0,
-				      0, 0, 0, 1)
+				0, scaleY, 0, 0,
+				0, 0, scaleZ, 0,
+				0, 0, 0, 1)
 		);
 	}
 
@@ -34,9 +34,9 @@ namespace Transform3D
 		// TODO implement rotate matrix
 		return glm::transpose(
 			glm::mat4(cosf(radians), -sinf(radians), 0, 0,
-				      sinf(radians), cosf(radians), 0, 0,
-				      0, 0, 1, 0,
-					  0, 0, 0, 1)
+				sinf(radians), cosf(radians), 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1)
 		);
 	}
 
@@ -46,9 +46,9 @@ namespace Transform3D
 		// TODO implement rotate matrix
 		return glm::transpose(
 			glm::mat4(cosf(radians), 0, sinf(radians), 0,
-				      0, 1, 0, 0,
-					  -sinf(radians), 0, cosf(radians), 0,
-					  0, 0, 0, 1)
+				0, 1, 0, 0,
+				-sinf(radians), 0, cosf(radians), 0,
+				0, 0, 0, 1)
 		);
 	}
 
@@ -58,9 +58,9 @@ namespace Transform3D
 		// TODO implement rotate matrix
 		return glm::transpose(
 			glm::mat4(1, 0, 0, 0,
-					  0, cosf(radians), -sinf(radians), 0,
-					  0, sinf(radians), cosf(radians), 0,
-					  0, 0, 0, 1)
+				0, cosf(radians), -sinf(radians), 0,
+				0, sinf(radians), cosf(radians), 0,
+				0, 0, 0, 1)
 		);
 	}
 }

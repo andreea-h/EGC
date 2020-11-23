@@ -1,21 +1,24 @@
 #pragma once
 #include <Component/SimpleScene.h>
-#include "LabCamera.h"
+#include "Camera.h"
+#include "Platform.h"
 
-class Laborator5 : public SimpleScene
+class Tema2 : public SimpleScene
 {
 	public:
-		Laborator5();
-		~Laborator5();
+		Tema2();
+		~Tema2();
 
 		void Init() override;
 
 	private:
+		void LoadPlatforms(); //incarca in scena platformele
+		
 		void FrameStart() override;
 		void Update(float deltaTimeSeconds) override;
 		void FrameEnd() override;
 
-		void RenderMesh(Mesh * mesh, Shader * shader, const glm::mat4 & modelMatrix) override;
+		void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix) override;
 
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -27,11 +30,16 @@ class Laborator5 : public SimpleScene
 		void OnWindowResize(int width, int height) override;
 
 	protected:
-		Laborator::Camera *camera;
+		Tema_2::Camera* camera;
 		glm::mat4 projectionMatrix;
 		bool renderCameraTarget;
-		
-		float fov = RADIANS(60);
-		float width = 50.0f;
-		float height = 40.0f;
+
+	private:
+		Platform* platforms; //obiectul care reprezinta platformele pe care merge jucatorul
+
+		float translateZ;
+		glm::mat4 thirdPersonCamPosition;
+		glm::mat4 firstPersonCamPosition;
+
+		bool thirdPersonCam; //devine false daca se atasa tasta C (se doreste modul firstPersonCamera)
 };

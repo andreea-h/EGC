@@ -60,7 +60,7 @@ void Laborator4::Update(float deltaTimeSeconds)
 
 	modelMatrix = glm::mat4(1);
 	modelMatrix *= Transform3D::Translate(-2.5f, 0.5f,-1.5f);
-	modelMatrix *= Transform3D::Translate(translateX, translateY, translateZ);
+	modelMatrix *= Transform3D::Translate(translate.x, translate.y, translate.z);
 	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
@@ -74,6 +74,32 @@ void Laborator4::Update(float deltaTimeSeconds)
 	modelMatrix *= Transform3D::RotateOY(angularStepOY);
 	modelMatrix *= Transform3D::RotateOZ(angularStepOZ);
 	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+	
+	angle += deltaTimeSeconds;
+	dist += deltaTimeSeconds / 3;
+	//soare
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(8, 8, 0);
+	modelMatrix *= Transform3D::Translate(dist, dist, 0);
+	modelMatrix *= Transform3D::RotateOY(angle);
+	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+
+	//pamant
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(8, 8, 0);
+	modelMatrix *= Transform3D::Translate(dist, dist, 0);
+	modelMatrix *= Transform3D::RotateOY(angle);
+	modelMatrix *= Transform3D::Translate(-8, -8, 0);
+	modelMatrix *= Transform3D::Translate(14, 8, 0);
+	modelMatrix *= Transform3D::Scale(0.75f, 0.75f, 0.75f);
+	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+
+	//satelit
+	modelMatrix *= Transform3D::RotateOY(angle);
+	modelMatrix *= Transform3D::Translate(4, 0, 0);
+	
+	modelMatrix *= Transform3D::Scale(0.45f, 0.45f, 0.45f);
+	RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
 }
 
 void Laborator4::FrameEnd()
@@ -83,7 +109,67 @@ void Laborator4::FrameEnd()
 
 void Laborator4::OnInputUpdate(float deltaTime, int mods)
 {
-	// TODO
+	float speed = 1.5f;
+	float move_offset = deltaTime * speed;
+
+	glm::vec3 offset = glm::vec3(0);
+
+	if (window->KeyHold(GLFW_KEY_A)) {
+		offset -= glm::vec3(1, 0, 0);
+	}
+	if (window->KeyHold(GLFW_KEY_D)) {
+		offset += glm::vec3(1, 0, 0);
+	}
+	if (window->KeyHold(GLFW_KEY_W)) {
+		offset -= glm::vec3(0, 0, 1);
+	}
+	if (window->KeyHold(GLFW_KEY_S)) {
+		offset += glm::vec3(0, 0, 1);
+	}
+	if (window->KeyHold(GLFW_KEY_R)) {
+		offset += glm::vec3(0, 1, 0);
+	}
+	if (window->KeyHold(GLFW_KEY_F)) {
+		offset -= glm::vec3(0, 1, 0);
+	}
+
+	if (glm::length(offset) > 0.f) {
+		offset = move_offset * glm::normalize(offset);
+	}
+
+	translate += offset;
+
+	if (window->KeyHold(GLFW_KEY_1)) {
+		scaleX += move_offset;
+		scaleY += move_offset;
+		scaleZ += move_offset;
+	}
+	if (window->KeyHold(GLFW_KEY_2)) {
+		scaleX -= move_offset;
+		scaleY -= move_offset;
+		scaleZ -= move_offset;
+	}
+	
+	if (window->KeyHold(GLFW_KEY_3)) {
+		angularStepOX += move_offset;
+	}
+	if (window->KeyHold(GLFW_KEY_4)) {
+		angularStepOX -= move_offset;
+	}
+
+	if (window->KeyHold(GLFW_KEY_5)) {
+		angularStepOY += move_offset;
+	}
+	if (window->KeyHold(GLFW_KEY_6)) {
+		angularStepOY -= move_offset;
+	}
+
+	if (window->KeyHold(GLFW_KEY_7)) {
+		angularStepOZ += move_offset;
+	}
+	if (window->KeyHold(GLFW_KEY_8)) {
+		angularStepOZ -= move_offset;
+	}
 }
 
 void Laborator4::OnKeyPress(int key, int mods)

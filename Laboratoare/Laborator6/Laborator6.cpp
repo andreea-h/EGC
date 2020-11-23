@@ -132,6 +132,7 @@ void Laborator6::FrameStart()
 
 void Laborator6::Update(float deltaTimeSeconds)
 {
+
 	{
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
@@ -167,25 +168,34 @@ void Laborator6::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & 
 		return;
 
 	// render an object using the specified shader and the specified position
-	glUseProgram(shader->program);
+	glUseProgram(shader->program);//foloseste shader-ul 
+
+	int timeLoc = glGetUniformLocation(shader->program, "time");
+	glUniform1f(timeLoc, Engine::GetElapsedTime());
 
 	// TODO : get shader location for uniform mat4 "Model"
-
 	// TODO : set shader uniform "Model" to modelMatrix
+	int modelMatrixLocation = glGetUniformLocation(shader->program, "Model");
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
 
 	// TODO : get shader location for uniform mat4 "View"
-
 	// TODO : set shader uniform "View" to viewMatrix
 	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
+	int viewMatrixLocation = glGetUniformLocation(shader->program, "View");
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 	// TODO : get shader location for uniform mat4 "Projection"
-
 	// TODO : set shader uniform "Projection" to projectionMatrix
 	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+	int projectionMatrixLocation = glGetUniformLocation(shader->program, "Projection");
+	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+
 
 	// Draw the object
 	glBindVertexArray(mesh->GetBuffers()->VAO);
-	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);//lanseaza in executie banda grafica
 }
 
 // Documentation for the input functions can be found in: "/Source/Core/Window/InputController.h" or

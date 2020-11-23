@@ -29,4 +29,8 @@ class Laborator4 : public SimpleScene
 		float scaleX, scaleY, scaleZ;
 		float angularStepOX, angularStepOY, angularStepOZ;
 		GLenum polygonMode;
+
+		glm::vec3 translate;
+		float angle;
+		float dist;
 };

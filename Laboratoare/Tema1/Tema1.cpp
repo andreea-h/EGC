@@ -28,48 +28,97 @@ void Tema1::Init() {
 
 	shurikenSide = 30;
 	Mesh* shuriken = CreateShuriken(shurikenSide);
-	AddMeshToList(shuriken);
 
 	Mesh* arrow = CreateArrow(5, 30);
-	AddMeshToList(arrow);
 
 	bowRadius = 100;
 	Mesh* bow = CreateBow();
-	AddMeshToList(bow);
 
 	ballonRadius = 30;
 	Mesh* yellowBallon = CreateBallon('y', ballonRadius);
-	AddMeshToList(yellowBallon);
 
 	Mesh* redBallon = CreateBallon('r', ballonRadius);
-	AddMeshToList(redBallon);
 	//retine coordonate pentre viitoarele translatii de baloane si shurikene
 	int i;
 	for (i = 0; i < 10; i++) {
 		translateY_values.push_back(0 - 200 * i);
 	}
 	Mesh* powerBar = CreateRectangle();
-	AddMeshToList(powerBar);
 
 	GenerateBallonColor(); //genereaza aleator culorile pentru cele 80 baloane
 	Mesh* ground = CreateGround();
-	AddMeshToList(ground);
 
 	Mesh* gigel = CreateGigel();
-	AddMeshToList(gigel);
 
 	Mesh* cap_gigel = CreateHead();
-	AddMeshToList(cap_gigel);
 
 	Mesh* eye = CreateEye();
-	AddMeshToList(eye);
 
 	Mesh* diamond = CreateDiamond();
-	AddMeshToList(diamond);
 
 	Mesh* star = createStar();
-	AddMeshToList(star);
 }
+
+Mesh* Tema1::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices)
+{
+	unsigned int VAO = 0;
+	// TODO: Create the VAO and bind it
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	// TODO: Create the VBO and bind it
+	unsigned int VBO = 0;
+	glGenBuffers(1, &VBO);
+
+	// TODO: Send vertices data into the VBO buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//trimite date la vbo-ul activ
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// TODO: Crete the IBO and bind it
+	unsigned int IBO = 0;
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+	// TODO: Send indices data into the IBO buffer
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),
+		&indices[0], GL_STATIC_DRAW);
+
+	// ========================================================================
+	// This section describes how the GPU Shader Vertex Shader program receives data
+	// It will be learned later, when GLSL shaders will be introduced
+	// For the moment just think that each property value from our vertex format needs to be send to a certain channel
+	// in order to know how to receive it in the GLSL vertex shader
+
+	// set vertex position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
+
+	// set vertex normal attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
+
+	// set texture coordinate attribute
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
+
+	// set vertex color attribute
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
+	// ========================================================================
+
+	// TODO: Unbind the VAO
+	glBindVertexArray(0); //dezactiveaza legatura catre VAO-ul curent
+
+	// Check for OpenGL errors
+	CheckOpenGLError();
+
+	// Mesh information is saved into a Mesh object
+	meshes[name] = new Mesh(name);
+	meshes[name]->InitFromBuffer(VAO, static_cast<unsigned short>(indices.size()));
+	return meshes[name];
+}
+
 
 Mesh* Tema1::createStar() {
 	Mesh* star = new Mesh("star");
@@ -94,7 +143,7 @@ Mesh* Tema1::createStar() {
 		0, 6, 4,
 		2, 0, 4
 	};
-	star->InitFromData(vertices, indices);
+	star = CreateMesh("star", vertices, indices);
 	return star;
 }
 
@@ -113,7 +162,7 @@ Mesh* Tema1::CreateEye() {
 		0, 2, 1,
 		1, 2, 3
 	};
-	eye->InitFromData(vertices, indices);
+	eye = CreateMesh("eye", vertices, indices);
 	return eye;
 }
 
@@ -134,7 +183,7 @@ Mesh* Tema1::CreateHead() {
 		1, 2, 3
 	};
 
-	cap_gigel->InitFromData(vertices, indices);
+	cap_gigel = CreateMesh("cap_gigel", vertices, indices);
 	return cap_gigel;
 }
 
@@ -183,7 +232,7 @@ Mesh* Tema1::CreateGigel() {
 		5, 19, 17, 
 		17, 19, 18
 	};
-	gigel->InitFromData(vertices, indices);
+	gigel = CreateMesh("gigel", vertices, indices);
 	return gigel;
 }
 
@@ -206,7 +255,7 @@ Mesh* Tema1::CreateDiamond() {
 		3, 5, 0, 
 		0, 5, 4
 	};
-	diamond->InitFromData(vertices, indices);
+	diamond = CreateMesh("diamond", vertices, indices);
 	return diamond;
 }
 
@@ -225,7 +274,7 @@ Mesh* Tema1::CreateGround() {
 		0, 3, 2
 	};
 	Mesh* ground = new Mesh("ground");
-	ground->InitFromData(vertices, indices);
+	ground = CreateMesh("ground", vertices, indices);
 	return ground;
 }
 
@@ -245,7 +294,7 @@ Mesh* Tema1::CreateRectangle() {
 		3, 2, 0
 	};
 	Mesh* powerBar = new Mesh("powerBar");
-	powerBar->InitFromData(vertices, indices);
+	powerBar = CreateMesh("powerBar", vertices, indices);
 	return powerBar;
 }
 
@@ -271,7 +320,7 @@ Mesh* Tema1::CreateArrow(float arrowSide, float lengthFactor) {
 
 	arrowLength = lengthFactor * arrowSide + 3 * arrowSide;
 	Mesh* arrow = new Mesh("arrow");
-	arrow->InitFromData(vertices, indices);
+	arrow = CreateMesh("arrow", vertices, indices);
 	return arrow;
 }
 
@@ -297,7 +346,7 @@ Mesh* Tema1::CreateShuriken(float shurikenSide) {
 		8, 7, 0
 	};
 	Mesh* shuriken = new Mesh("shuriken");
-	shuriken->InitFromData(vertices, indices);
+	shuriken = CreateMesh("shuriken", vertices, indices);
 	return shuriken;
 }
 
@@ -318,7 +367,7 @@ Mesh* Tema1::CreateBow() {
 		indices.push_back(k);
 	}
 	Mesh* bow = new Mesh("bow");
-	bow->InitFromData(vertices, indices);
+	bow = CreateMesh("bow", vertices, indices);
 	bow->SetDrawMode(GL_LINE_LOOP);
 	return bow;
 }
@@ -393,12 +442,12 @@ Mesh* Tema1::CreateBallon(char color, float R) {
 	
 	if (color == 'y') {
 		Mesh* yellowBallon = new Mesh("yellowBallon");
-		yellowBallon->InitFromData(vertices, indices);
+		yellowBallon = CreateMesh("yellowBallon", vertices, indices);
 		return yellowBallon;
 	}
 	if (color == 'r') {
 		Mesh* redBallon = new Mesh("redBallon");
-		redBallon->InitFromData(vertices, indices);
+		redBallon = CreateMesh("redBallon", vertices, indices);
 		return redBallon;
 	}
 }
@@ -1030,8 +1079,8 @@ void Tema1::OnKeyRelease(int key, int mods)
 
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
-	float diffX = mouseX - modelMatrixArrow[2][0] /*- arrowSide * cosf(radiusArrow)*/;
-	float diffY = window->GetResolution().y - mouseY - modelMatrixArrow[2][1] /*- arrowSide * sinf(radiusArrow)*/;
+	float diffX = mouseX - modelMatrixArrow[2][0];
+	float diffY = window->GetResolution().y - mouseY - modelMatrixArrow[2][1];
 	if (diffX > 0 && diffY != 0) {
 		float temp = atan(diffY / diffX);
 		//limitam rotirea arcului si a sagetii dupa pozitia mouse-ului in intervalul [-45 gr, 45 gr]
@@ -1059,8 +1108,8 @@ void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 	else {
 		float aux;
 		aux = clock() - throwTimer;
-		if (aux / 1000.0f <= 2) { //se poate arunca un arc o data la 4s
-			cout << "Mai trebuie sa astepti " << 2 - aux/1000.0f << " secunde inainte de a arunca inca a sageata :)" << endl;
+		if (aux / 1000.0f <= 4) { //se poate arunca o sageata o data la 3s
+			cout << "Mai trebuie sa astepti " << 4 - aux/1000.0f << " secunde inainte de a arunca inca a sageata :)" << endl;
 			mouseClick = false;
 			powerFactor = 0;
 			return;

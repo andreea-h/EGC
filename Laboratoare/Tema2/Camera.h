@@ -2,7 +2,7 @@
 #include <include/glm.h>
 #include <include/math.h>
 
-namespace Laborator
+namespace Tema_2
 {
 	class Camera
 	{
@@ -11,12 +11,12 @@ namespace Laborator
 			{
 				position = glm::vec3(0, 2, 5);
 				forward = glm::vec3(0, 0, -1);
-				up		= glm::vec3(0, 1, 0);
-				right	= glm::vec3(1, 0, 0);
+				up = glm::vec3(0, 1, 0);
+				right = glm::vec3(1, 0, 0);
 				distanceToTarget = 2;
 			}
 
-			Camera(const glm::vec3 &position, const glm::vec3 &center, const glm::vec3 &up)
+			Camera(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up)
 			{
 				Set(position, center, up);
 			}
@@ -25,12 +25,12 @@ namespace Laborator
 			{ }
 
 			// Update camera
-			void Set(const glm::vec3 &position, const glm::vec3 &center, const glm::vec3 &up)
+			void Set(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up)
 			{
 				this->position = position;
-				forward = glm::normalize(center-position);
-				right	= glm::cross(forward, up);
-				this->up = glm::cross(right,forward);
+				forward = glm::normalize(center - position);
+				right = glm::cross(forward, up);
+				this->up = glm::cross(right, forward);
 			}
 
 			void MoveForward(float distance)
@@ -41,7 +41,7 @@ namespace Laborator
 				// movement will keep the camera at the same height always
 				// Example: If you rotate up/down your head and walk forward you will still keep the same relative distance (height) to the ground!
 				// Translate the camera using the DIR vector computed from forward
-			
+
 			}
 
 			void TranslateForward(float distance)
