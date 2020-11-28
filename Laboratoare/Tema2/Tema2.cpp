@@ -11,10 +11,12 @@ using namespace std;
 
 Tema2::Tema2()
 {
+	FoV = 90.0f;
 	thirdPersonCamPosition = glm::mat4(1);
-	thirdPersonCamPosition = Transform3D::Translate(0, 2.0f, 3.0f);
+	thirdPersonCamPosition = Transform3D::Translate(0, 1.75f, 2.5f);
 
 	platforms = new Platform();
+	platforms->generatePlatform();
 }
 
 Tema2::~Tema2()
@@ -43,8 +45,68 @@ void Tema2::Init()
 		meshes[mesh->GetMeshID()] = mesh;
 	}
 
-	projectionMatrix = glm::perspective(RADIANS(60), window->props.aspectRatio, 0.01f, 200.0f);
+	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
+
+	//adauga un shader in vectorul shaders
+	Shader* shader = new Shader("colorShader");
+	shader->AddShader("Source/Laboratoare/Tema2/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+	shader->AddShader("Source/Laboratoare/Tema2/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
+	shader->CreateAndLink();
+	shaders["colorShader"] = shader;
 }
+
+
+void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
+{
+	if (!mesh || !shader || !shader->GetProgramID())
+		return;
+
+	// render an object using the specified shader and the specified position
+	glUseProgram(shader->program);
+
+	// Set shader uniforms for light & material properties
+	// TODO: Set light position uniform
+	GLint lightPosLoc = glGetUniformLocation(shader->program, "light_position");
+	glUniform3f(lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
+
+	// TODO: Set eye position (camera position) uniform
+	glm::vec3 eyePosition = camera->position;
+	int eyePosLoc = glGetUniformLocation(shader->program, "eye_position");
+	glUniform3f(eyePosLoc, eyePosition.x, eyePosition.y, eyePosition.z);
+
+	// TODO: Set material property uniforms (shininess, kd, ks, object color) 
+	//componeneta difuza=intensitatea de material difuza
+	GLint varLoc = glGetUniformLocation(shader->program, "material_kd");
+	glUniform1f(varLoc, materialKd);
+	//componenta speculara=intensitatea de material speculara
+	varLoc = glGetUniformLocation(shader->program, "material_ks");
+	glUniform1f(varLoc, materialKs);
+
+	varLoc = glGetUniformLocation(shader->program, "material_shininess");
+	glUniform1i(varLoc, materialShininess);
+
+	varLoc = glGetUniformLocation(shader->program, "object_color");
+	glUniform3f(varLoc, color.x, color.y, color.z);
+
+	// Bind model matrix
+	GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
+	glUniformMatrix4fv(loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+	// Bind view matrix
+	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
+	int loc_view_matrix = glGetUniformLocation(shader->program, "View");
+	glUniformMatrix4fv(loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+	// Bind projection matrix
+	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+	int loc_projection_matrix = glGetUniformLocation(shader->program, "Projection");
+	glUniformMatrix4fv(loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+	// Draw the object
+	glBindVertexArray(mesh->GetBuffers()->VAO);
+	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);
+}
+
 
 void Tema2::FrameStart()
 {
@@ -59,57 +121,43 @@ void Tema2::FrameStart()
 }
 
 void Tema2::LoadPlatforms() {
-	
-	int size = platforms->countPlatforms();//nr de cuburi care vor fi randate
-	
 	int i;
-	cout << translateZ << endl;
-	for (i = 0; i < size; i++) {
-		
-		//elimina acele platforme care ies din scena in spatele jucatorului
-		//pentru fiecare platforma este memorata coordoanata z
-		platforms->setPlatformZCoord(translateZ, i);
-		if (platforms->getPlatformPos(i) > 2) {
-			platforms->deletePlatform(i);
-			size--;
-		}
-	}
-
-	if (size == 0) {
-		platforms->generatePlatform();
-		size = platforms->countPlatforms();
-		translateZ = 0;
-	}
-
-
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < 3; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Scale(0.75f, 0.25f, platforms->getPlatformSize(i));
-		modelMatrix *= Transform3D::Translate(0, 0, -1);
-		modelMatrix *= Transform3D::Translate(i * 2, 0, translateZ);
-		RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Translate(1.5f * (i - 1), 0, -1 + translateZ);
+
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
 
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < 3; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Scale(0.75f, 0.25f, platforms->getPlatformSize(i));
-		modelMatrix *= Transform3D::Translate(0, 0, -1);
-		modelMatrix *= Transform3D::Translate(i * 2, 0, -2 + translateZ);
-		RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Translate(1.5f * (i - 1), 0, -3 + translateZ);
+
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
+	}
+	for (i = 0; i < 3; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Translate(1.5f * (i - 1), 0, -5 + translateZ);
+
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
 }
 
 void Tema2::Update(float deltaTimeSeconds)
 {
-	translateZ += 0.25 * deltaTimeSeconds;
+	translateZ += 0.25 * deltaTimeSeconds; //deplasare pe Z a platformelor
 
 	LoadPlatforms();
 
 	//jucatorul
-	glm::mat4 modelMatrix3 = glm::mat4(1);
-	modelMatrix3 *= Transform3D::Translate(0, 0.5f, -3);
-	modelMatrix3 *= Transform3D::Scale(0.25f, 0.5f, 0.5f);
-	RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix3);
+	glm::mat4 modelMatrix = glm::mat4(1);
+	glm::vec3 pos = player.getPlayerCoords();
+	modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
+	modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+	RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.482, 0.408, 0.933));
 
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
 	if (renderCameraTarget)
@@ -123,7 +171,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
 void Tema2::FrameEnd()
 {
-	DrawCoordinatSystem(camera->GetViewMatrix(), projectionMatrix);
+	//DrawCoordinatSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
