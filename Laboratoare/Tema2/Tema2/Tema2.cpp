@@ -11,7 +11,7 @@ using namespace std;
 
 Tema2::Tema2()
 {
-	FoV = 90.0f;
+	FoV = 45.0f;
 	thirdPersonCamPosition = glm::mat4(1);
 	thirdPersonCamPosition = Transform3D::Translate(0, 1.75f, 1.5f);
 
@@ -111,7 +111,7 @@ void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema2::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(0.118, 0.565, 1.000, 1);
+	glClearColor(1.000, 0.855, 0.725, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -132,7 +132,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 3; i < 6; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2);
+		platforms->setTranslatePoint(i, -2 - maxCoord - 0.25f - platforms->getPlatformSize(i) / 2);
 	}
 	float maxCoord1 = -999;
 	for (i = 3; i < 6; i++)
@@ -142,7 +142,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 6; i < 9; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f);
+		platforms->setTranslatePoint(i, -2 - maxCoord - 0.25f * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
 }
 
@@ -158,7 +158,7 @@ void Tema2::LoadPlatforms() {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
@@ -172,7 +172,7 @@ void Tema2::LoadPlatforms() {
 	
 	if (count == 3) {
 		ok1 = true;//platformele de la 0 la 2 nu vor mai aparea, trebuie sterse
-		cout << "La i = 0 trebuie modificare" << endl;
+		//cout << "La i = 0 trebuie modificare" << endl;
 	}
 	count = 0;
 	//1.25f este distanta dintre platforme
@@ -180,7 +180,7 @@ void Tema2::LoadPlatforms() {
 		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
@@ -189,7 +189,7 @@ void Tema2::LoadPlatforms() {
 	for (i = 6; i < 9; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 7), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
+		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
@@ -221,7 +221,7 @@ void Tema2::LoadPlayer() {
 	glm::vec3 pos = player.getPlayerCoords();
 	modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
 	modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
-	RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.482, 0.408, 0.933));
+	RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 }
 
 void Tema2::Update(float deltaTimeSeconds)

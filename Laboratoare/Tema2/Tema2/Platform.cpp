@@ -89,7 +89,7 @@ void Platform::generatePlatform() {
 	float length;
 	int i;
 	srand(time(NULL));
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 3; i++) {
 		length = randGenerator(2, 10);
 		//cout << "generat: " << length << endl;
 		zLengths.push_back(length);
@@ -106,6 +106,131 @@ void Platform::generatePlatform() {
 		}
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
+		}
+	}
+	colors[1] = glm::vec3(0.482, 0.408, 0.933);//mov
+	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
+	float maxLength = -999;
+	int pos = 0;
+	for (i = 0; i < 3; i++) {
+		if (zLengths[i] > maxLength) {
+			maxLength = zLengths[i];
+			pos = i;
+		}
+	}
+	if (colors[pos] == glm::vec3(1, 0, 0)) {//rosu
+		//schimba culoarea
+		while (colors[pos] == glm::vec3(1, 0, 0)) {
+			int color = genColor();
+			if (color == 1) { //rosu
+				colors[pos] = glm::vec3(1, 0, 0);
+			}
+			else if (color == 2) { //galben
+				colors[pos] = glm::vec3(1, 1, 0);
+			}
+			else if (color == 3) { //portocaliu
+				colors[pos] = glm::vec3(1.000, 0.647, 0.000);
+			}
+			else if (color == 4) { //verde
+				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
+			}
+		}
+	}
+
+
+	//randul 2 de cuburi
+	for (i = 3; i < 6; i++) {
+		length = randGenerator(2, 10);
+		//cout << "generat: " << length << endl;
+		zLengths.push_back(length);
+		//genereaza aleator culoarea
+		int color = genColor();
+		if (color == 1) { //rosu
+			colors.push_back(glm::vec3(1, 0, 0));
+		}
+		else if (color == 2) { //galben
+			colors.push_back(glm::vec3(1, 1, 0));
+		}
+		else if (color == 3) { //portocaliu
+			colors.push_back(glm::vec3(1.000, 0.647, 0.000));
+		}
+		else if (color == 4) { //verde
+			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
+		}
+	}
+	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
+	maxLength = -999;
+	pos = 0;
+	for (i = 3; i < 6; i++) {
+		if (zLengths[i] > maxLength) {
+			maxLength = zLengths[i];
+			pos = i;
+		}
+	}
+	if (colors[pos] == glm::vec3(1, 0, 0)) {//rosu
+		//schimba culoarea
+		while (colors[pos] == glm::vec3(1, 0, 0)) {
+			int color = genColor();
+			if (color == 1) { //rosu
+				colors[pos] = glm::vec3(1, 0, 0);
+			}
+			else if (color == 2) { //galben
+				colors[pos] = glm::vec3(1, 1, 0);
+			}
+			else if (color == 3) { //portocaliu
+				colors[pos] = glm::vec3(1.000, 0.647, 0.000);
+			}
+			else if (color == 4) { //verde
+				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
+			}
+		}
+	}
+
+	//randul 3 de cuburi
+	for (i = 6; i < 9; i++) {
+		length = randGenerator(2, 10);
+		//cout << "generat: " << length << endl;
+		zLengths.push_back(length);
+		//genereaza aleator culoarea
+		int color = genColor();
+		if (color == 1) { //rosu
+			colors.push_back(glm::vec3(1, 0, 0));
+		}
+		else if (color == 2) { //galben
+			colors.push_back(glm::vec3(1, 1, 0));
+		}
+		else if (color == 3) { //portocaliu
+			colors.push_back(glm::vec3(1.000, 0.647, 0.000));
+		}
+		else if (color == 4) { //verde
+			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
+		}
+	}
+	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
+	maxLength = -999;
+	pos = 0;
+	for (i = 6; i < 9; i++) {
+		if (zLengths[i] > maxLength) {
+			maxLength = zLengths[i];
+			pos = i;
+		}
+	}
+	if (colors[pos] == glm::vec3(1, 0, 0)) {//rosu
+		//schimba culoarea
+		while (colors[pos] != glm::vec3(1, 0, 0)) {
+			int color = genColor();
+			if (color == 1) { //rosu
+				colors[pos] = glm::vec3(1, 0, 0);
+			}
+			else if (color == 2) { //galben
+				colors[pos] = glm::vec3(1, 1, 0);
+			}
+			else if (color == 3) { //portocaliu
+				colors[pos] = glm::vec3(1.000, 0.647, 0.000);
+			}
+			else if (color == 4) { //verde
+				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
+			}
 		}
 	}
 }
@@ -134,27 +259,41 @@ void Platform::generateNewPlatforms()
 		}
 		//translateZVal.push_back(0);
 		zCoords.push_back(0);
-	}/*
-	int j;
-	float var = -999;
-	for (j = 6; j < 9; j++) {
-		if (zLengths[j] > var) {
-			var = zLengths[j];
+	}
+	
+	//verifica ca platforma cea mai lunga dintre cele generate sa nu fie de culoare rosie
+	float maxLength = -999;
+	int pos = 0;
+	for (i = 6; i < 9; i++) {
+		if (zLengths[i] > maxLength) {
+			maxLength = zLengths[i];
+			pos = i;
 		}
 	}
 	
-	for (j = 0; j < 3; j++) {
-		translateZPoint.push_back(translateZPoint[3] - 1.25f - var);
+	if (colors[pos] == glm::vec3(1, 0, 0)) {//rosu
+		//schimba culoarea
+		cout << "platforma " << pos << " este rosie" << endl;
+		while (colors[pos] == glm::vec3(1, 0, 0)) {
+			int color = genColor();
+			if (color == 1) { //rosu
+				colors[pos] = glm::vec3(1, 0, 0);
+			}
+			else if (color == 2) { //galben
+				colors[pos] = glm::vec3(1, 1, 0);
+			}
+			else if (color == 3) { //portocaliu
+				colors[pos] = glm::vec3(1.000, 0.647, 0.000);
+			}
+			else if (color == 4) { //verde
+				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
+			}
+		}
 	}
-	
-	*/
-	
-	float max1 = lastMaxPlatform;
-	
-	cout << max1 << endl;
 
+	float max1 = lastMaxPlatform;
 	float max2 = -999;
-	int pos = 0;
+	pos = 0;
 	for (i = 0; i < 3; i++)
 	{
 		if (zLengths[i] > max2) {
@@ -176,7 +315,7 @@ void Platform::generateNewPlatforms()
 	for (i = 6; i < 9; i++) {
 		//-2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f
 		//translateZPoint.push_back(-2 -1.25f * 3 - zLengths[i]/2 - max1 - max2 - max3);
-		translateZPoint.push_back(-2 + translateZPoint[pos] - zLengths[i] / 2 - 1.25f * 3);
+		translateZPoint.push_back(translateZPoint[pos] - max3/2 - zLengths[i] / 2 - 0.25f);
 	}
 }
 
