@@ -149,32 +149,34 @@ void Platform::generateNewPlatforms()
 	
 	*/
 	
-	float maxCoord = -999;
-	for (i = 0; i < 3; i++) {
-		if (zLengths[i] > maxCoord) {
-			maxCoord = zLengths[i];
+	float max1 = lastMaxPlatform;
+	
+	cout << max1 << endl;
+
+	float max2 = -999;
+	int pos = 0;
+	for (i = 0; i < 3; i++)
+	{
+		if (zLengths[i] > max2) {
+			max2 = zLengths[i];
+			pos = i;
 		}
 	}
 	
-	float maxCoord1 = -999;
+	float max3 = -999;
+	
 	for (i = 3; i < 6; i++)
 	{
-		if (zLengths[i] > maxCoord1) {
-			maxCoord1 = zLengths[i];
+		if (zLengths[i] > max3) {
+			max3 = zLengths[i];
+			pos = i;
 		}
 	}
 	
-	float maxCoord2 = -999;
-	for (i = 6; i < 9; i++)
-	{
-		if (zLengths[i] > maxCoord2) {
-			maxCoord2 = zLengths[i];
-		}
-	}
-
 	for (i = 6; i < 9; i++) {
 		//-2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f
-		translateZPoint.push_back(-1.25f * 3- zLengths[i]/2 - maxCoord1 - maxCoord - maxCoord2);
+		//translateZPoint.push_back(-2 -1.25f * 3 - zLengths[i]/2 - max1 - max2 - max3);
+		translateZPoint.push_back(-2 + translateZPoint[pos] - zLengths[i] / 2 - 1.25f * 3);
 	}
 }
 
@@ -190,6 +192,11 @@ glm::vec3 Platform::getPlatformColor(int index) {
 	return colors[index];
 }
 
+void Platform::setLastMaxPlatform(float val) 
+{
+	lastMaxPlatform = val;
+}
+
 //sterge platformele care nu mai sunt vizibile in spatiul de desenare
 void Platform::deletePlatform(int i) {
 	zLengths.erase(zLengths.begin() + i);
@@ -197,5 +204,6 @@ void Platform::deletePlatform(int i) {
 	colors.erase(colors.begin() + i);
 
 	translateZPoint.erase(translateZPoint.begin() + i);
+	
 	//translateZVal.erase(translateZVal.begin() + i);
 }

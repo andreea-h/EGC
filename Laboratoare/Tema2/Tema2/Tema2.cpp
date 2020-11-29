@@ -198,12 +198,21 @@ void Tema2::LoadPlatforms() {
 	
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
 	if (ok1 == true) {
+		//calculeaza lungimea celei mai lungi platforme din cele care se sterg
+		int i;
+		float maxSize = -999;
+		for (i = 0; i < 3; i++) {
+			if (platforms->getPlatformSize(i) > maxSize) {
+				maxSize = platforms->getPlatformSize(i);
+			}
+		}
+
+		platforms->setLastMaxPlatform(maxSize);
 		platforms->deletePlatform(0);
 		platforms->deletePlatform(0);
 		platforms->deletePlatform(0);
 		platforms->generateNewPlatforms();
 	}
-	
 }
 
 void Tema2::LoadPlayer() {

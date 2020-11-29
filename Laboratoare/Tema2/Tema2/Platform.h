@@ -23,7 +23,7 @@ public:
 	void generateNewPlatforms();
 	void setTranslatePoint(int i, float val);
 	float getTranslatePoint(int i);
-	
+	void setLastMaxPlatform(float val);
 
 	int countPlatforms(); //intoarce numarul de elemente din zLengths
 
@@ -34,5 +34,5 @@ private:
 	std::vector<float> translateZVal; //cu cat sunt translatate de directia OZ cuburile
 	std::vector<float> translateZPoint;
 
-
+	float lastMaxPlatform; //lumgimea celei mai lungi platforme din ultimul rand sters
 };
