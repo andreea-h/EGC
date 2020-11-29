@@ -15,6 +15,7 @@ Platform::Platform()
 	zCoords = std::vector<float>(9);
 	colors = std::vector<glm::vec3>();
 	translateZVal = std::vector<float>(9);
+	translateZPoint = std::vector<float>(9);
 }
 
 Platform::~Platform()
@@ -54,6 +55,16 @@ void Platform::generate3NewPlat(int index)
 			colors[i] = glm::vec3(0.000, 0.502, 0.000);
 		}
 	}
+}
+
+float Platform::getTranslatePoint(int i) 
+{
+	return translateZPoint[i];
+}
+
+void Platform::setTranslatePoint(int i, float val)
+{
+	translateZPoint[i] = val;
 }
 
 int Platform::countPlatforms() {
@@ -121,11 +132,51 @@ void Platform::generateNewPlatforms()
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
 		}
-		translateZVal.push_back(0);
+		//translateZVal.push_back(0);
 		zCoords.push_back(0);
+	}/*
+	int j;
+	float var = -999;
+	for (j = 6; j < 9; j++) {
+		if (zLengths[j] > var) {
+			var = zLengths[j];
+		}
+	}
+	
+	for (j = 0; j < 3; j++) {
+		translateZPoint.push_back(translateZPoint[3] - 1.25f - var);
+	}
+	
+	*/
+	
+	float maxCoord = -999;
+	for (i = 0; i < 3; i++) {
+		if (zLengths[i] > maxCoord) {
+			maxCoord = zLengths[i];
+		}
+	}
+	
+	float maxCoord1 = -999;
+	for (i = 3; i < 6; i++)
+	{
+		if (zLengths[i] > maxCoord1) {
+			maxCoord1 = zLengths[i];
+		}
+	}
+	
+	float maxCoord2 = -999;
+	for (i = 6; i < 9; i++)
+	{
+		if (zLengths[i] > maxCoord2) {
+			maxCoord2 = zLengths[i];
+		}
+	}
+
+	for (i = 6; i < 9; i++) {
+		//-2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f
+		translateZPoint.push_back(-1.25f * 3- zLengths[i]/2 - maxCoord1 - maxCoord - maxCoord2);
 	}
 }
-
 
 float Platform::getPlatformSize(int index) { //dimensiunea platformei de la un anumit index
 	return zLengths[index];
@@ -144,5 +195,7 @@ void Platform::deletePlatform(int i) {
 	zLengths.erase(zLengths.begin() + i);
 	zCoords.erase(zCoords.begin() + i);
 	colors.erase(colors.begin() + i);
+
+	translateZPoint.erase(translateZPoint.begin() + i);
 	//translateZVal.erase(translateZVal.begin() + i);
 }

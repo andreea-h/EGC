@@ -17,6 +17,7 @@ Tema2::Tema2()
 
 	platforms = new Platform();
 	platforms->generatePlatform();
+	setTranslatePoints();
 }
 
 Tema2::~Tema2()
@@ -118,24 +119,49 @@ void Tema2::FrameStart()
 	glViewport(0, 0, resolution.x, resolution.y);
 }
 
+void Tema2::setTranslatePoints()
+{
+	int i;
+	for (i = 0; i < 3; i++) {
+		platforms->setTranslatePoint(i, -2 - platforms->getPlatformSize(i) / 2);
+	}
+	float maxCoord = -999;
+	for (i = 0; i < 3; i++) {
+		if (platforms->getPlatformSize(i) > maxCoord) {
+			maxCoord = platforms->getPlatformSize(i);
+		}
+	}
+	for (i = 3; i < 6; i++) {
+		platforms->setTranslatePoint(i, -2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2);
+	}
+	float maxCoord1 = -999;
+	for (i = 3; i < 6; i++)
+	{
+		if (platforms->getPlatformSize(i) > maxCoord1) {
+			maxCoord1 = platforms->getPlatformSize(i);
+		}
+	}
+	for (i = 6; i < 9; i++) {
+		platforms->setTranslatePoint(i, -2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f);
+	}
+}
+
+
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ
 void Tema2::LoadPlatforms() {
-	int i;
-	int count = 0;
-	bool ok1 = false;
-	bool ok3 = false;
-	bool ok2 = false;
 	
+	int i;
+	bool ok1 = false;
+	int count = 0;
+
 	for (i = 0; i < 3; i++) {
-		cout << "trans: " << platforms->getTranslateVal(i) << endl;
 		glm::mat4 modelMatrix = glm::mat4(1);
-		
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, -2 - platforms->getPlatformSize(i) / 2 + platforms->getTranslateVal(i));
+		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
+		modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		
 		if (platforms->getPlatformPos(i) <= 2.5f) {
 			RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 		}
@@ -143,111 +169,41 @@ void Tema2::LoadPlatforms() {
 			count++;
 		}
 	}
-	//determina coordonata minima pe OZ pentru cuburile din randul precendent
-	float maxCoord = 999;
-	for (i = 0; i < 3; i++) {
-		if (platforms->getPlatformPos(i) < maxCoord) {
-			maxCoord = platforms->getPlatformPos(i);
-		}
-	}
+	
 	if (count == 3) {
 		ok1 = true;//platformele de la 0 la 2 nu vor mai aparea, trebuie sterse
 		cout << "La i = 0 trebuie modificare" << endl;
-		/*
-		platforms->generate3NewPlat(0); //genereaza trei noi dimensiuni si culori pt 3 platforme incepand de la indexul 0
-		int j;
-		float maxCoord1 = 999;
-		for (i = 6; i < 9; i++) {
-			if (platforms->getPlatformPos(i) < maxCoord1) {
-				maxCoord1 = platforms->getPlatformPos(i);
-			}
-		}
-		for (j = 0; j < 3; j++) {
-			platforms->setTranslateVal(maxCoord1 - 1.25f, j);
-		}*/
 	}
 	count = 0;
 	//1.25f este distanta dintre platforme
 	for (i = 3; i < 6; i++) {
+		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 + platforms->getTranslateVal(i));
+		modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		if (platforms->getPlatformPos(i) <= 2.5f) {
-			RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
-		}
-		else {
-			count++;
-		}
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
-	if (count == 3) {
-		ok2 = true;
-		cout << "La i = 3 trebuie modificare" << endl;
-		/*
-		platforms->generate3NewPlat(3); //genereaza trei noi dimensiuni si culori pt 3 platforme incepand de la indexul 0
-		int j;
-		for (j = 3; j < 6; j++)
-		{
-			platforms->setTranslateVal(platforms->getPlatformPos(8) - 10, j);
-		}*/
-	}
-
-	float maxCoord1 = 999;
-	for (i = 3; i < 6; i++)
-	{
-		if (platforms->getPlatformPos(i) < maxCoord1){
-			maxCoord1 = platforms->getPlatformPos(i);
-		}
-	}
-	count = 0;
-	
 	for (i = 6; i < 9; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 7), 0, maxCoord1 - 1.25f - platforms->getPlatformSize(i) / 2 + platforms->getTranslateVal(i));
+		modelMatrix *= Transform3D::Translate(2.5f * (i - 7), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.5f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		if (platforms->getPlatformPos(i) <= 2.5f) {
-			RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
-		}
-		else {
-			count++;
-		}
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
-	if (count == 3) {
-		cout << "La i = 6 trebuie modificare" << endl;
-		ok3 = true;
-		/*s
-		platforms->generate3NewPlat(6); //genereaza trei noi dimensiuni si culori pt 3 platforme incepand de la indexul 0
-		int j;
-		for (j = 6; j < 9; j++)
-		{
-			platforms->setTranslateVal(platforms->getPlatformPos(8) - 10, j);
-		}*/
-	}
+	
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
-	/*if (ok1 == true) {
+	if (ok1 == true) {
 		platforms->deletePlatform(0);
-		platforms->deletePlatform(1);
-		platforms->deletePlatform(2);
-		platforms->generateNewPlatforms();
-		cout << "aici" << endl;
-	}
-	if (ok2 == true) {
-		platforms->deletePlatform(3);
-		platforms->deletePlatform(4);
-		platforms->deletePlatform(5);
+		platforms->deletePlatform(0);
+		platforms->deletePlatform(0);
 		platforms->generateNewPlatforms();
 	}
-	if (ok3 == true) {
-		platforms->deletePlatform(6);
-		platforms->deletePlatform(7);
-		platforms->deletePlatform(8);
-		platforms->generateNewPlatforms();
-	}*/
+	
 }
 
 void Tema2::LoadPlayer() {
@@ -268,7 +224,6 @@ void Tema2::Update(float deltaTimeSeconds)
 	}
 
 	LoadPlatforms();
-
 	LoadPlayer();
 
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement

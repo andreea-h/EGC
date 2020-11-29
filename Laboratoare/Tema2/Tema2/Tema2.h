@@ -15,6 +15,7 @@ public:
 private:
 	void LoadPlatforms(); //incarca in scena platformele
 	void LoadPlayer();
+	void setTranslatePoints();
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;

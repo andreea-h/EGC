@@ -21,6 +21,9 @@ public:
 	float getTranslateVal(int index);
 	void generate3NewPlat(int index);
 	void generateNewPlatforms();
+	void setTranslatePoint(int i, float val);
+	float getTranslatePoint(int i);
+	
 
 	int countPlatforms(); //intoarce numarul de elemente din zLengths
 
@@ -29,4 +32,7 @@ private:
 	std::vector<float> zCoords; //coordonatele platformelor pe directia z
 	std::vector<glm::vec3> colors; //culorile initiale ale platformelor
 	std::vector<float> translateZVal; //cu cat sunt translatate de directia OZ cuburile
+	std::vector<float> translateZPoint;
+
+
 };
