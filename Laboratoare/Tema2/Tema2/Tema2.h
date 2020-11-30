@@ -16,6 +16,9 @@ private:
 	void LoadPlatforms(); //incarca in scena platformele
 	void LoadPlayer();
 	void setTranslatePoints();
+	void LoadStartPlatform();
+	bool checkCollision(int index);
+
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -56,5 +59,6 @@ private:
 	glm::mat4 targetPosition;
 
 	bool thirdPersonCam; //isi schimba valoarea la apasarea tastei C (se doreste modul firstPersonCamera)
-	
+	bool start;
+	bool play; //este true daca platforma de start nu este mai redata in scena
 };

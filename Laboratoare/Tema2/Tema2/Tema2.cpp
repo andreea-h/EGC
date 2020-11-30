@@ -132,7 +132,7 @@ void Tema2::setTranslatePoints()
 {
 	int i;
 	for (i = 0; i < 3; i++) {
-		platforms->setTranslatePoint(i, -2 - platforms->getPlatformSize(i) / 2);
+		platforms->setTranslatePoint(i, -5.5f - platforms->getPlatformSize(i) / 2);
 	}
 	float maxCoord = -999;
 	for (i = 0; i < 3; i++) {
@@ -141,7 +141,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 3; i < 6; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 1 - platforms->getPlatformSize(i) / 2);
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 - platforms->getPlatformSize(i) / 2);
 	}
 	float maxCoord1 = -999;
 	for (i = 3; i < 6; i++)
@@ -151,7 +151,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 6; i < 9; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
 }
 
@@ -170,7 +170,11 @@ void Tema2::LoadPlatforms() {
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
+
 		if (platforms->getPlatformPos(i) <= 2.5f) {
 			RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 		}
@@ -192,6 +196,9 @@ void Tema2::LoadPlatforms() {
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
@@ -201,6 +208,9 @@ void Tema2::LoadPlatforms() {
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
@@ -249,19 +259,77 @@ void Tema2::LoadPlayer() {
 			targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), 
 			glm::vec3(0, 1, 0));
 	}
+}
 
+//inainte de a incepe jocul este redata o platforma de start
+void Tema2::LoadStartPlatform() 
+{
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0, 0, -2.0f + translateZ);
+	modelMatrix *= Transform3D::Scale(7, 0.25f, 7.0f);
+	RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, glm::vec3(0.690, 0.878, 0.902));
+}
+
+// verifica coliziunea jucatorului cu platforma de cu indicele index
+bool Tema2::checkCollision(int index) {
+	bool ok = false;
+
+	glm::vec4 playerCoord = player.getActualPlayerCoords();
+	//coordonata pe directia OZ a platformei cu indexul dat
+	float i;
+	float max_step = platforms->getPlatformPos(index) + platforms->getPlatformSize(index);
+	float step = platforms->getPlatformPos(index);
+	float zCoord;
+	float xCoord;
+	float yCoord;
+	xCoord = platforms->getPlatformXCoord(index);
+	yCoord = platforms->getPlatformYCoord(index);
+	for (i = step; i < max_step; i += 0.02f) {
+		float zCoord = i;
+		
+		//cout << "x: " << xCoord << " y: " << yCoord << " z: " << platformCoord << endl;
+		//verifica daca punctul cubului cel mai apropiat de sfera este plasat in interiorul sferei
+		float distance = sqrt(pow((xCoord - playerCoord.x), 2) + pow((yCoord - playerCoord.y), 2) + pow((zCoord - playerCoord.z), 2));
+
+		if (distance < 1.0f) { //coliziune
+			ok = true;
+		}
+	}
+
+	return ok;
 }
 
 void Tema2::Update(float deltaTimeSeconds)
 {
-	int i;
-
-	for (i = 0; i < 9; i++) {
-		platforms->setTranslateVal(platforms->getTranslateVal(i) + 1.75 * deltaTimeSeconds, i);	
+	
+	if (start == true) {
+		int i;
+		for (i = 0; i < 9; i++) {
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 3 * deltaTimeSeconds, i);
+		}
+		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
+			translateZ += 3 * deltaTimeSeconds;
+		}
+	}
+	
+	if (translateZ <= 7) { //daca s-a deplasat suficient cat sa nu mai fie vizibila in scena, platforma de strat nu mai este redata
+		LoadStartPlatform();
+	}
+	else {
+		play = true;
 	}
 
 	LoadPlatforms();
 	LoadPlayer();
+
+	int i;
+	for (i = 0; i < 9; i++) {
+		if (checkCollision(i) == true) {
+			//cout << " Coliziune cu platforma " << i << endl;
+			platforms->setPlatformColor(i);
+			//schimba culoarea platformei
+		}
+	}
 
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
 	if (renderCameraTarget)
@@ -330,18 +398,32 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 			camera->TranslateUpword(cameraSpeed * deltaTime);
 		}
 	}
+	
+	if (window->KeyHold(GLFW_KEY_W)) { //mareste viteza de deplasare a platformelor
+		int i;
+		for (i = 0; i < 9; i++) {
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 1.75 * deltaTime, i);
+		}
+	}
+
+	
+	if (window->KeyHold(GLFW_KEY_S)) { //scade viteza de deplasare a platformelor
+		int i;
+		for (i = 0; i < 9; i++) {
+			platforms->setTranslateVal(platforms->getTranslateVal(i) - 1.25f * deltaTime, i);
+		}
+	}
+
 }
 
 void Tema2::OnKeyPress(int key, int mods)
 {
 	// add key press event
-	if (key == GLFW_KEY_T)
-	{
+	if (key == GLFW_KEY_T){
 		renderCameraTarget = !renderCameraTarget;
 	}
 
-	if (key == GLFW_KEY_C)
-	{
+	if (key == GLFW_KEY_C){
 		if (!thirdPersonCam)
 		{
 			camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
@@ -351,19 +433,20 @@ void Tema2::OnKeyPress(int key, int mods)
 		
 	}
 
-	if (key == GLFW_KEY_A) //deplaseaza jucatorul
-	{
+	if (key == GLFW_KEY_A) {//deplaseaza jucatorul
 		player.setXCoord(player.getXCoord() - 2.25f);
 	}
 
-	if (key == GLFW_KEY_D)
-	{
+	if (key == GLFW_KEY_D) {
 		player.setXCoord(player.getXCoord() + 2.25f);
 	}
 
-	if (key == GLFW_KEY_SPACE)
-	{
+	if (key == GLFW_KEY_SPACE){
 		player.setYCoord(player.getYCoord() + 1.0f);
+	}
+
+	if (key == GLFW_KEY_X) {
+		start = true;
 	}
 }
 

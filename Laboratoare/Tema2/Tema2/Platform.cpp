@@ -13,6 +13,8 @@ Platform::Platform()
 {
 	zLengths = std::vector<float>();
 	zCoords = std::vector<float>(9);
+	xCoords = std::vector<float>(9);
+	yCoords = std::vector<float>(9);
 	colors = std::vector<glm::vec3>();
 	translateZVal = std::vector<float>(9);
 	translateZPoint = std::vector<float>(9);
@@ -28,7 +30,7 @@ float randGenerator(float a, float b) {
 }
 
 int genColor() {
-	int color = rand() % 4 + 1; //numar din intervalul [1, 5]
+	int color = rand() % 5 + 1; //numar din intervalul [1, 5]
 	return color;
 }
 
@@ -107,8 +109,10 @@ void Platform::generatePlatform() {
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
 		}
+		else if (color == 5) { //albastru
+			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
+		}
 	}
-	colors[1] = glm::vec3(0.482, 0.408, 0.933);//mov
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
 	float maxLength = -999;
 	int pos = 0;
@@ -134,6 +138,9 @@ void Platform::generatePlatform() {
 			else if (color == 4) { //verde
 				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
 			}
+			else if (color == 5) { //albastru
+				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
+			}
 		}
 	}
 
@@ -156,6 +163,9 @@ void Platform::generatePlatform() {
 		}
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
+		}
+		else if (color == 5) { //albastru
+			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
 		}
 	}
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
@@ -183,6 +193,9 @@ void Platform::generatePlatform() {
 			else if (color == 4) { //verde
 				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
 			}
+			else if (color == 5) { //albastru
+				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
+			}
 		}
 	}
 
@@ -204,6 +217,9 @@ void Platform::generatePlatform() {
 		}
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
+		}
+		else if (color == 5) { //albastru
+			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
 		}
 	}
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
@@ -231,6 +247,9 @@ void Platform::generatePlatform() {
 			else if (color == 4) { //verde
 				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
 			}
+			else if (color == 5) { //albastru
+				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
+			}
 		}
 	}
 }
@@ -257,8 +276,12 @@ void Platform::generateNewPlatforms()
 		else if (color == 4) { //verde
 			colors.push_back(glm::vec3(0.000, 0.502, 0.000));
 		}
-		//translateZVal.push_back(0);
+		else if (color == 5) { //albastru
+			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
+		}
 		zCoords.push_back(0);
+		xCoords.push_back(0);
+		yCoords.push_back(0);
 	}
 	
 	//verifica ca platforma cea mai lunga dintre cele generate sa nu fie de culoare rosie
@@ -273,7 +296,6 @@ void Platform::generateNewPlatforms()
 	
 	if (colors[pos] == glm::vec3(1, 0, 0)) {//rosu
 		//schimba culoarea
-		cout << "platforma " << pos << " este rosie" << endl;
 		while (colors[pos] == glm::vec3(1, 0, 0)) {
 			int color = genColor();
 			if (color == 1) { //rosu
@@ -287,6 +309,9 @@ void Platform::generateNewPlatforms()
 			}
 			else if (color == 4) { //verde
 				colors[pos] = glm::vec3(0.000, 0.502, 0.000);
+			}
+			else if (color == 5) { //albastru
+				colors[pos] = glm::vec3(0.118, 0.565, 1.000);
 			}
 		}
 	}
@@ -313,8 +338,6 @@ void Platform::generateNewPlatforms()
 	}
 	
 	for (i = 6; i < 9; i++) {
-		//-2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f
-		//translateZPoint.push_back(-2 -1.25f * 3 - zLengths[i]/2 - max1 - max2 - max3);
 		translateZPoint.push_back(translateZPoint[pos] - max3/2 - zLengths[i] / 2 - 1);
 	}
 }
@@ -336,10 +359,33 @@ void Platform::setLastMaxPlatform(float val)
 	lastMaxPlatform = val;
 }
 
+void Platform::setPlatformXCoord(float x, int index) 
+{
+	xCoords[index] = x;
+}
+
+void Platform::setPlatformYCoord(float y, int index)
+{
+	yCoords[index] = y;
+}
+
+float Platform::getPlatformXCoord(int index) {
+	return xCoords[index];
+}
+float Platform::getPlatformYCoord(int index) {
+	return yCoords[index];
+}
+
+void Platform::setPlatformColor(int index) {
+	colors[index] = glm::vec3(0.482, 0.408, 0.933); //coloarea mov
+}
+
 //sterge platformele care nu mai sunt vizibile in spatiul de desenare
 void Platform::deletePlatform(int i) {
 	zLengths.erase(zLengths.begin() + i);
 	zCoords.erase(zCoords.begin() + i);
+	xCoords.erase(xCoords.begin() + i);
+	yCoords.erase(yCoords.begin() + i);
 	colors.erase(colors.begin() + i);
 
 	translateZPoint.erase(translateZPoint.begin() + i);
