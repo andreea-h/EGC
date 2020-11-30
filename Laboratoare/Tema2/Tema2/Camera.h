@@ -36,7 +36,7 @@ namespace Tema_2
 			void MoveForward(float distance)
 			{
 				glm::vec3 dir = glm::normalize(glm::vec3(forward.x, 0, forward.z));
-				position += dir * distance;
+				//position += dir * distance;
 
 				// movement will keep the camera at the same height always
 				// Example: If you rotate up/down your head and walk forward you will still keep the same relative distance (height) to the ground!
@@ -47,13 +47,13 @@ namespace Tema_2
 			void TranslateForward(float distance)
 			{
 				// TODO : Translate the camera using the "forward" vector
-				position += forward * distance;
+				position += glm::normalize(forward) * distance;
 			}
 
 			void TranslateUpword(float distance)
 			{
 				// TODO : Translate the camera using the up vector
-				position += up * distance;
+				position += glm::normalize(up) * distance;
 			}
 
 			void TranslateRight(float distance)
@@ -63,7 +63,7 @@ namespace Tema_2
 				// Usually translation using camera "right' is not very useful because if the camera is rotated around the "forward" vector 
 				// translation over the right direction will have an undesired effect; the camera will get closer or farther from the ground
 				// Using the projected right vector (onto the ground plane) makes more sense because we will keep the same distance from the ground plane
-				position += right * distance;
+				position += glm::normalize(right) * distance;
 			}
 			//roteste camera in jurul axei OX
 			void RotateFirstPerson_OX(float angle)
@@ -75,7 +75,7 @@ namespace Tema_2
 				//recalcum axele, mai putin right
 				forward = glm::rotate(glm::mat4(1), angle, right) * glm::vec4(forward, 0);
 				forward = glm::normalize(forward);
-				up = glm::cross(right, forward);
+				up = glm::normalize(glm::cross(right, forward));
 			}
 			//rotatia nu se face in jurul axei up, se face in jurul axei OY a lumii
 			void RotateFirstPerson_OY(float angle)
@@ -86,9 +86,9 @@ namespace Tema_2
 				// Use glm::rotate()
 				forward = glm::rotate(glm::mat4(1), angle, glm::vec3(0, 1, 0)) * glm::vec4(forward, 0);
 				forward = glm::normalize(forward);
-				right = glm::rotate(glm::mat4(1), angle, glm::vec3(0, 1, 0)) * glm::vec4(right, 0);
+				right = glm::rotate(glm::mat4(1), angle, glm::vec3(0, 1, 0)) * glm::vec4(right, 1);
 				right = glm::normalize(right);
-				up = glm::cross(right, forward);
+				up = glm::normalize(glm::cross(right, forward));
 			}
 
 			void RotateFirstPerson_OZ(float angle)
@@ -96,9 +96,9 @@ namespace Tema_2
 				// TODO
 				// Compute the new Right and Up, Forward stays the same
 				// Don't forget to normalize the vectors
-				right = glm::rotate(glm::mat4(1), angle, forward) * glm::vec4(right, 0);
+				right = glm::rotate(glm::mat4(1), angle, forward) * glm::vec4(right, 1);
 				right = glm::normalize(right);
-				up = glm::cross(right, forward);
+				up = glm::normalize(glm::cross(right, forward));
 			}
 
 			void RotateThirdPerson_OX(float angle)
@@ -106,18 +106,18 @@ namespace Tema_2
 				// TODO
 				// Rotate the camera in Third Person mode - OX axis
 				// Use distanceToTarget as translation distance
-				TranslateForward(distanceToTarget);
+				TranslateRight(distanceToTarget);
 				RotateFirstPerson_OX(angle);
-				TranslateForward(-distanceToTarget);
+				TranslateRight(-distanceToTarget);
 			}
 
 			void RotateThirdPerson_OY(float angle)
 			{
 				// TODO
 				// Rotate the camera in Third Person mode - OY axis
-				TranslateForward(distanceToTarget);
+				TranslateUpword(distanceToTarget);
 				RotateFirstPerson_OY(angle);
-				TranslateForward(-distanceToTarget);
+				TranslateUpword(-distanceToTarget);
 			}
 
 			void RotateThirdPerson_OZ(float angle)

@@ -315,7 +315,7 @@ void Platform::generateNewPlatforms()
 	for (i = 6; i < 9; i++) {
 		//-2 - maxCoord - 1.25f - platforms->getPlatformSize(i) / 2 - maxCoord1 - 1.25f
 		//translateZPoint.push_back(-2 -1.25f * 3 - zLengths[i]/2 - max1 - max2 - max3);
-		translateZPoint.push_back(translateZPoint[pos] - max3/2 - zLengths[i] / 2 - 0.25f);
+		translateZPoint.push_back(translateZPoint[pos] - max3/2 - zLengths[i] / 2 - 1);
 	}
 }
 

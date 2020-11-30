@@ -13,22 +13,31 @@ Player::~Player()
 
 }
 
-glm::vec3 Player::getPlayerCoords() {
+void Player::setActualCoords(glm::vec4 coords) {
+	actualPlayerCoords = coords;
+}
+
+glm::vec4 Player::getActualPlayerCoords() {
+	return actualPlayerCoords;
+}
+
+glm::vec3 Player::getInitialPlayerCoords() {
 	return playerCoords;
 }
 
 float Player::getXCoord() {
-	return playerCoords.x;
+	return actualPlayerCoords.x;
 }
 
 void Player::setXCoord(float x) {
-	playerCoords.x = x;
+	actualPlayerCoords.x = x;
 }
 
 float Player::getYCoord() {
-	return playerCoords.y;
+	return actualPlayerCoords.y;
 }
 
 void Player::setYCoord(float y) {
-	playerCoords.y = y;
+	actualPlayerCoords.y = y;
 }
+

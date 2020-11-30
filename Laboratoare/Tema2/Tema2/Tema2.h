@@ -50,9 +50,11 @@ private:
 	Player player;
 
 	float translateZ;
-	glm::mat4 thirdPersonCamPosition;
+	glm::mat4 thirdPersonCamPosition; //pozitiile camerelor third si first person
 	glm::mat4 firstPersonCamPosition;
 
-	bool thirdPersonCam; //devine false daca se atasa tasta C (se doreste modul firstPersonCamera)
+	glm::mat4 targetPosition;
+
+	bool thirdPersonCam; //isi schimba valoarea la apasarea tastei C (se doreste modul firstPersonCamera)
 	
 };

@@ -12,10 +12,29 @@ using namespace std;
 Tema2::Tema2()
 {
 	FoV = 45.0f;
+	//defineste pozitia initiala a camerei
 	thirdPersonCamPosition = glm::mat4(1);
-	thirdPersonCamPosition = Transform3D::Translate(0, 1.75f, 1.5f);
+	thirdPersonCamPosition = Transform3D::Translate(0, 1.75f, 3.5f);
+	thirdPersonCam = true;
+
+	//defineste pozitia camerei firstPerson
+	firstPersonCamPosition = glm::mat3(1);
+	glm::vec3 pos = player.getInitialPlayerCoords();
+	firstPersonCamPosition *= Transform3D::Translate(pos.x, pos.y, pos.z - 0.5f);
+	
+	targetPosition = firstPersonCamPosition;
+	targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+	renderCameraTarget = false;
+	camera = new Tema_2::Camera();
+	camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+
+	
+	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
 
 	platforms = new Platform();
+
+	//defineste coordonatele la care urmeaza sa fie redate cuburile
 	platforms->generatePlatform();
 	setTranslatePoints();
 }
@@ -28,12 +47,6 @@ Tema2::~Tema2()
 
 void Tema2::Init()
 {
-	renderCameraTarget = false;
-
-	camera = new Tema_2::Camera();
-	
-	camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-
 	{
 		Mesh* mesh = new Mesh("box");
 		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Primitives", "box.obj");
@@ -45,9 +58,6 @@ void Tema2::Init()
 		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Primitives", "sphere.obj");
 		meshes[mesh->GetMeshID()] = mesh;
 	}
-
-	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
-
 	//adauga un shader in vectorul shaders
 	Shader* shader = new Shader("colorShader");
 	shader->AddShader("Source/Laboratoare/Tema2/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -90,18 +100,17 @@ void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 	glUniform3f(varLoc, color.x, color.y, color.z);
 
 	// Bind model matrix
-	GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
-	glUniformMatrix4fv(loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "Model");
+	glUniformMatrix4fv(loc_modelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	// Bind view matrix
-	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-	int loc_view_matrix = glGetUniformLocation(shader->program, "View");
-	glUniformMatrix4fv(loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glm::mat4 viewMatrix = camera->GetViewMatrix();
+	int loc_viewMatrix = glGetUniformLocation(shader->program, "View");
+	glUniformMatrix4fv(loc_viewMatrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 	// Bind projection matrix
-	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
-	int loc_projection_matrix = glGetUniformLocation(shader->program, "Projection");
-	glUniformMatrix4fv(loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	int loc_projectionMatrix = glGetUniformLocation(shader->program, "Projection");
+	glUniformMatrix4fv(loc_projectionMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 	// Draw the object
 	glBindVertexArray(mesh->GetBuffers()->VAO);
@@ -132,7 +141,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 3; i < 6; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 0.25f - platforms->getPlatformSize(i) / 2);
+		platforms->setTranslatePoint(i, -2 - maxCoord - 1 - platforms->getPlatformSize(i) / 2);
 	}
 	float maxCoord1 = -999;
 	for (i = 3; i < 6; i++)
@@ -142,7 +151,7 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 6; i < 9; i++) {
-		platforms->setTranslatePoint(i, -2 - maxCoord - 0.25f * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+		platforms->setTranslatePoint(i, -2 - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
 }
 
@@ -215,13 +224,32 @@ void Tema2::LoadPlatforms() {
 	}
 }
 
+// reda jucatorul in scena
 void Tema2::LoadPlayer() {
-	//jucatorul
 	glm::mat4 modelMatrix = glm::mat4(1);
-	glm::vec3 pos = player.getPlayerCoords();
+	glm::vec3 pos = player.getActualPlayerCoords();
 	modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
 	modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+	glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+	//salveaza coordonatele actuale ale jucatorului
+
+	player.setActualCoords(coords);
+
 	RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+
+	firstPersonCamPosition = glm::mat4(1);
+	firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+
+	targetPosition = firstPersonCamPosition;
+	targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+	if (!thirdPersonCam)
+	{
+		camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), 
+			targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), 
+			glm::vec3(0, 1, 0));
+	}
+
 }
 
 void Tema2::Update(float deltaTimeSeconds)
@@ -318,22 +346,19 @@ void Tema2::OnKeyPress(int key, int mods)
 		{
 			camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 		}
-		if (thirdPersonCam == true) {
-			thirdPersonCam = false;
-		}
-		else {
-			thirdPersonCam = true;
-		}
+		
+		thirdPersonCam = !thirdPersonCam;
+		
 	}
 
 	if (key == GLFW_KEY_A) //deplaseaza jucatorul
 	{
-		//player.setXCoord(player.getXCoord() - 2.25f);
+		player.setXCoord(player.getXCoord() - 2.25f);
 	}
 
 	if (key == GLFW_KEY_D)
 	{
-		//player.setXCoord(player.getXCoord() + 2.25f);
+		player.setXCoord(player.getXCoord() + 2.25f);
 	}
 
 	if (key == GLFW_KEY_SPACE)
@@ -363,16 +388,20 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 			renderCameraTarget = false;
 			// TODO : rotate the camera in First-person mode around OX and OY using deltaX and deltaY
 			// use the sensitivity variables for setting up the rotation speed
-			camera->RotateFirstPerson_OX(-deltaY * sensivityOX);
-			camera->RotateFirstPerson_OY(-deltaX * sensivityOY);
+			if (!thirdPersonCam) {
+				camera->RotateFirstPerson_OX(-deltaY * sensivityOX);
+				camera->RotateFirstPerson_OY(-deltaX * sensivityOY);
+			}
 		}
 
 		if (window->GetSpecialKeyState() && GLFW_MOD_CONTROL) {
 			renderCameraTarget = true;
 			// TODO : rotate the camera in Third-person mode around OX and OY using deltaX and deltaY
 			// use the sensitivity variables for setting up the rotation speed
-			camera->RotateThirdPerson_OX(-deltaY * sensivityOX);
-			camera->RotateFirstPerson_OY(-deltaX * sensivityOY);
+			if (thirdPersonCam) {
+				camera->RotateThirdPerson_OX(-deltaY * sensivityOX);
+				camera->RotateThirdPerson_OY(-deltaX * sensivityOY);
+			}
 		}
 
 	}
