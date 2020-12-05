@@ -34,31 +34,6 @@ int genColor() {
 	return color;
 }
 
-void Platform::generate3NewPlat(int index) 
-{
-	int i, length;
-	srand(time(NULL));
-	for (i = index; i < index + 3; i++) {
-		length = randGenerator(2, 10);
-
-		zLengths[i] = length;
-		//genereaza aleator culoarea
-		int color = genColor();
-		if (color == 1) { //rosu
-			colors[i] = glm::vec3(1, 0, 0);
-		}
-		else if (color == 2) { //galben
-			colors[i] = glm::vec3(1, 1, 0);
-		}
-		else if (color == 3) { //portocaliu
-			colors[i] = glm::vec3(1.000, 0.647, 0.000);
-		}
-		else if (color == 4) { //verde
-			colors[i] = glm::vec3(0.000, 0.502, 0.000);
-		}
-	}
-}
-
 float Platform::getTranslatePoint(int i) 
 {
 	return translateZPoint[i];
@@ -92,7 +67,7 @@ void Platform::generatePlatform() {
 	int i;
 	srand(time(NULL));
 	for (i = 0; i < 3; i++) {
-		length = randGenerator(2, 10);
+		length = randGenerator(5, 10);
 		//cout << "generat: " << length << endl;
 		zLengths.push_back(length);
 		//genereaza aleator culoarea
@@ -147,7 +122,7 @@ void Platform::generatePlatform() {
 
 	//randul 2 de cuburi
 	for (i = 3; i < 6; i++) {
-		length = randGenerator(2, 10);
+		length = randGenerator(5, 10);
 		//cout << "generat: " << length << endl;
 		zLengths.push_back(length);
 		//genereaza aleator culoarea
@@ -201,7 +176,7 @@ void Platform::generatePlatform() {
 
 	//randul 3 de cuburi
 	for (i = 6; i < 9; i++) {
-		length = randGenerator(2, 10);
+		length = randGenerator(5, 10);
 		//cout << "generat: " << length << endl;
 		zLengths.push_back(length);
 		//genereaza aleator culoarea
@@ -260,7 +235,7 @@ void Platform::generateNewPlatforms()
 	int i;
 	srand(time(NULL));
 	for (i = 6; i < 9; i++) {
-		length = randGenerator(2, 10);
+		length = randGenerator(5, 10);
 		zLengths.push_back(length);
 		//genereaza aleator culoarea
 		int color = genColor();
@@ -389,6 +364,4 @@ void Platform::deletePlatform(int i) {
 	colors.erase(colors.begin() + i);
 
 	translateZPoint.erase(translateZPoint.begin() + i);
-	
-	//translateZVal.erase(translateZVal.begin() + i);
 }

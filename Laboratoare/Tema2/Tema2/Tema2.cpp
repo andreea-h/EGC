@@ -158,23 +158,21 @@ void Tema2::setTranslatePoints()
 
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ
 void Tema2::LoadPlatforms() {
-	
 	int i;
 	bool ok1 = false;
 	int count = 0;
 
 	for (i = 0; i < 3; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
-
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 
+		//platformele care dispar in spatele camerei nu mai sunt redate
 		if (platforms->getPlatformPos(i) <= 2.5f) {
 			RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 		}
@@ -185,12 +183,10 @@ void Tema2::LoadPlatforms() {
 	
 	if (count == 3) {
 		ok1 = true;//platformele de la 0 la 2 nu vor mai aparea, trebuie sterse
-		//cout << "La i = 0 trebuie modificare" << endl;
 	}
 	count = 0;
 	//1.25f este distanta dintre platforme
 	for (i = 3; i < 6; i++) {
-		//cout << "i: " << i << "size: " << platforms->getPlatformSize(i) << endl;
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
@@ -198,7 +194,6 @@ void Tema2::LoadPlatforms() {
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
-
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
@@ -210,7 +205,6 @@ void Tema2::LoadPlatforms() {
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
-
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
@@ -235,29 +229,201 @@ void Tema2::LoadPlatforms() {
 }
 
 // reda jucatorul in scena
-void Tema2::LoadPlayer() {
-	glm::mat4 modelMatrix = glm::mat4(1);
-	glm::vec3 pos = player.getActualPlayerCoords();
-	modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
-	modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
-	glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
-	//salveaza coordonatele actuale ale jucatorului
+void Tema2::LoadPlayer(float delta) {
+	if (fallingPlayer == true) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		glm::vec3 pos = player.getActualPlayerCoords();
+		modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
+		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+		//salveaza coordonatele actuale ale jucatorului
+		float y = coords.y;
+		y -= 2 * delta;
+		
+		player.setActualCoords(glm::vec4(coords.x, y, coords.z, 1));
 
-	player.setActualCoords(coords);
+		if (y < -5) { //jucatorul s-a aflat suficient timp in cadere, jocul se va incheia
+			stopGame = true;
+		}
+		if (stopGame == false) {
+			RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
-	RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+			firstPersonCamPosition = glm::mat4(1);
+			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
 
-	firstPersonCamPosition = glm::mat4(1);
-	firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+			targetPosition = firstPersonCamPosition;
+			targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
 
-	targetPosition = firstPersonCamPosition;
-	targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+			if (!thirdPersonCam)
+			{
+				camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+					targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+					glm::vec3(0, 1, 0));
+			}
+		}
+	}
+	else if (jumping == false && moveLeft == false && moveRight == false) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		glm::vec3 pos = player.getActualPlayerCoords();
+		modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
+		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+		//salveaza coordonatele actuale ale jucatorului
 
-	if (!thirdPersonCam)
-	{
-		camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), 
-			targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), 
-			glm::vec3(0, 1, 0));
+		player.setActualCoords(coords);
+
+		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+
+		firstPersonCamPosition = glm::mat4(1);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+
+		targetPosition = firstPersonCamPosition;
+		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+		if (!thirdPersonCam)
+		{
+			camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				glm::vec3(0, 1, 0));
+		}
+	}
+	else if (jumping == true) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		glm::vec3 pos = player.getActualPlayerCoords();
+		float y = pos.y;
+		if (isUpJumping == true) {
+			if (y >= 0.35f) {
+				y -= 1.5 * delta;
+			}
+			else {
+				isUpJumping = false;
+				jumping = false;
+			}
+		}
+		else {
+			if (y <= 1) {
+				y += 1.5 * delta;
+			}
+			else {
+				isUpJumping = true;
+			}
+		}
+		
+		modelMatrix *= Transform3D::Translate(pos.x, y, pos.z);
+		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+		//salveaza coordonatele actuale ale jucatorului
+
+		player.setActualCoords(coords);
+
+		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+
+		firstPersonCamPosition = glm::mat4(1);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+
+		targetPosition = firstPersonCamPosition;
+		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+		if (!thirdPersonCam)
+		{
+			camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				glm::vec3(0, 1, 0));
+		}
+	}
+	else if (moveLeft == true) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		glm::vec3 pos = player.getActualPlayerCoords();
+		float y = pos.y;
+		float x = pos.x;
+		if (isUpLeft == true) {
+			if (y >= 0.35f) {
+				y -= 1.5 * delta;
+			}
+			else {
+				isUpLeft = false;
+				moveLeft = false;
+			}
+		}
+		else {
+			if (y <= 1) {
+				y += 1.5 * delta;
+			}
+			else {
+				isUpLeft = true;
+			}
+		}
+		x -= 2.45f * delta;
+		modelMatrix *= Transform3D::Translate(x, y, pos.z);
+		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+		//salveaza coordonatele actuale ale jucatorului
+
+		player.setActualCoords(coords);
+
+		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+
+		firstPersonCamPosition = glm::mat4(1);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+
+		targetPosition = firstPersonCamPosition;
+		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+		if (!thirdPersonCam)
+		{
+			camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				glm::vec3(0, 1, 0));
+		}
+	}
+
+	else if (moveRight == true) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		glm::vec3 pos = player.getActualPlayerCoords();
+		float y = pos.y;
+		float x = pos.x;
+		if (isUpRight == true) {
+			if (y >= 0.35f) {
+				y -= 1.5 * delta;
+			}
+			else {
+				isUpRight = false;
+				moveRight = false;
+			}
+		}
+		else {
+			if (y <= 1) {
+				y += 1.5 * delta;
+			}
+			else {
+				isUpRight = true;
+			}
+		}
+		x += 2.45f * delta;
+		modelMatrix *= Transform3D::Translate(x, y, pos.z);
+		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
+		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
+		//salveaza coordonatele actuale ale jucatorului
+
+		player.setActualCoords(coords);
+
+		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+
+		firstPersonCamPosition = glm::mat4(1);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+
+		targetPosition = firstPersonCamPosition;
+		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
+
+		if (!thirdPersonCam)
+		{
+			camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
+				glm::vec3(0, 1, 0));
+		}
+	}
+	else {
+
 	}
 }
 
@@ -267,16 +433,18 @@ void Tema2::LoadStartPlatform()
 	glm::mat4 modelMatrix = glm::mat4(1);
 	modelMatrix *= Transform3D::Translate(0, 0, -2.0f + translateZ);
 	modelMatrix *= Transform3D::Scale(7, 0.25f, 7.0f);
+	glm::vec3 position = modelMatrix * glm::vec4(0, 0, 0, 1);
+	startPlatformZ = position.z;
 	RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, glm::vec3(0.690, 0.878, 0.902));
 }
 
-// verifica coliziunea jucatorului cu platforma de cu indicele index
+// verifica coliziunea jucatorului cu platforma cu indicele index
 bool Tema2::checkCollision(int index) {
 	bool ok = false;
-
 	glm::vec4 playerCoord = player.getActualPlayerCoords();
 	//coordonata pe directia OZ a platformei cu indexul dat
 	float i;
+	//stabileste coordonatele suprafetei platformei
 	float max_step = platforms->getPlatformPos(index) + platforms->getPlatformSize(index);
 	float step = platforms->getPlatformPos(index);
 	float zCoord;
@@ -287,11 +455,10 @@ bool Tema2::checkCollision(int index) {
 	for (i = step; i < max_step; i += 0.02f) {
 		float zCoord = i;
 		
-		//cout << "x: " << xCoord << " y: " << yCoord << " z: " << platformCoord << endl;
 		//verifica daca punctul cubului cel mai apropiat de sfera este plasat in interiorul sferei
 		float distance = sqrt(pow((xCoord - playerCoord.x), 2) + pow((yCoord - playerCoord.y), 2) + pow((zCoord - playerCoord.z), 2));
 
-		if (distance < 1.0f) { //coliziune
+		if (distance < 0.5f) { //coliziune
 			ok = true;
 		}
 	}
@@ -301,35 +468,46 @@ bool Tema2::checkCollision(int index) {
 
 void Tema2::Update(float deltaTimeSeconds)
 {
-	
-	if (start == true) {
+	if (start == true && fallingPlayer == false) {
 		int i;
 		for (i = 0; i < 9; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 3 * deltaTimeSeconds, i);
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
-			translateZ += 3 * deltaTimeSeconds;
+			translateZ += 4.5f * deltaTimeSeconds;
 		}
 	}
-	
-	if (translateZ <= 7) { //daca s-a deplasat suficient cat sa nu mai fie vizibila in scena, platforma de strat nu mai este redata
+
+	if (translateZ <= 7) {
 		LoadStartPlatform();
 	}
-	else {
+	else {//daca s-a deplasat suficient cat sa nu mai fie vizibila in scena, platforma de start nu mai este redata
 		play = true;
 	}
 
 	LoadPlatforms();
-	LoadPlayer();
+	LoadPlayer(deltaTimeSeconds);
 
 	int i;
+	bool checkPlayerPos = true;
 	for (i = 0; i < 9; i++) {
 		if (checkCollision(i) == true) {
-			//cout << " Coliziune cu platforma " << i << endl;
 			platforms->setPlatformColor(i);
 			//schimba culoarea platformei
+			checkPlayerPos = false;
 		}
 	}
+	//daca jucatorul nu are coliziune cu nicio platforma iar jocul nu este in nicio situatie speciala
+	//(inainte de start joc, saritura la apasarea space, deplasare stanga-dreapta), atunci este 'activata' animatia de cadere a mingii
+
+	if (checkPlayerPos == true) {
+		if (jumping == false && moveLeft == false && moveRight == false) {
+			if (play == true) {
+				fallingPlayer = true;
+			}
+		}
+	}
+
 
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
 	if (renderCameraTarget)
@@ -340,6 +518,7 @@ void Tema2::Update(float deltaTimeSeconds)
 		RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
 	}
 }
+
 
 void Tema2::FrameEnd()
 {
@@ -406,7 +585,6 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 		}
 	}
 
-	
 	if (window->KeyHold(GLFW_KEY_S)) { //scade viteza de deplasare a platformelor
 		int i;
 		for (i = 0; i < 9; i++) {
@@ -434,29 +612,28 @@ void Tema2::OnKeyPress(int key, int mods)
 	}
 
 	if (key == GLFW_KEY_A) {//deplaseaza jucatorul
-		player.setXCoord(player.getXCoord() - 2.25f);
+		moveLeft = true;
+		//player.setXCoord(player.getXCoord() - 2.25f);
 	}
 
 	if (key == GLFW_KEY_D) {
-		player.setXCoord(player.getXCoord() + 2.25f);
+		moveRight = true;
+		//player.setXCoord(player.getXCoord() + 2.25f);
 	}
 
 	if (key == GLFW_KEY_SPACE){
-		player.setYCoord(player.getYCoord() + 1.0f);
+		jumping = true;
 	}
 
 	if (key == GLFW_KEY_X) {
 		start = true;
+		startGame = true;
 	}
 }
 
 void Tema2::OnKeyRelease(int key, int mods)
 {
-	// add key release event
-	if (key == GLFW_KEY_SPACE)
-	{
-		player.setYCoord(player.getYCoord() - 1.0f);
-	}
+	
 }
 
 void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)

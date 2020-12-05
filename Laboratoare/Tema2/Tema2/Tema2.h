@@ -14,7 +14,7 @@ public:
 
 private:
 	void LoadPlatforms(); //incarca in scena platformele
-	void LoadPlayer();
+	void LoadPlayer(float delta);
 	void setTranslatePoints();
 	void LoadStartPlatform();
 	bool checkCollision(int index);
@@ -53,6 +53,8 @@ private:
 	Player player;
 
 	float translateZ;
+	float startPlatformZ; //coordonata z a platformei de start 
+
 	glm::mat4 thirdPersonCamPosition; //pozitiile camerelor third si first person
 	glm::mat4 firstPersonCamPosition;
 
@@ -61,4 +63,19 @@ private:
 	bool thirdPersonCam; //isi schimba valoarea la apasarea tastei C (se doreste modul firstPersonCamera)
 	bool start;
 	bool play; //este true daca platforma de start nu este mai redata in scena
+
+	bool startGame = false; //devine true cand incepe jocul (la apasarea tastei x)
+	bool jumping = false; //devine true la apasarea tastei Space
+	bool down = false;
+
+	bool isUpJumping = false; //devine true daca mingea a atins nivelul maxim in cadrul unei sarituri
+	bool isUpLeft = false; //devine true daca mingea a atins nivelul maxim de inaltime la deplasarea pe coloana stanga
+	bool isUpRight = false; //devine true daca mingea a atins nivelul maxim de inaltime la deplasarea pe coloana dreapta
+
+	bool moveLeft = false; //jucatorul se deplaseaza pe coloana stanga
+	bool moveRight = false; //jucatorul se deplaseaza pe coloana dreapta
+	bool fallingPlayer = false; //jucatorul se afla in cadere de pe o platforma
+
+	bool stopGame = false; //devine true atunci cand jucatorul a cazut pe de platforme si va disparea din scena, urmand ca jocul sa se incheie
+
 };
