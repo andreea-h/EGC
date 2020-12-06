@@ -18,6 +18,9 @@ private:
 	void setTranslatePoints();
 	void LoadStartPlatform();
 	bool checkCollision(int index);
+	void renderFuelInformation(float deltaTimeSeconds);
+	Mesh* DefineSquare();
+	Mesh* DefineBlackSquare();
 
 
 	void FrameStart() override;
@@ -78,4 +81,6 @@ private:
 
 	bool stopGame = false; //devine true atunci cand jucatorul a cazut pe de platforme si va disparea din scena, urmand ca jocul sa se incheie
 
+	float initialFuelValue = 250.0f; //cantitate initiala de combustibil (si maxima)
+	float fuelValue = initialFuelValue; //cantitatea curenta de combustibil de care dispune 
 };

@@ -44,6 +44,46 @@ Tema2::~Tema2()
 	delete camera;
 }
 
+Mesh* Tema2::DefineSquare() {
+	glm::vec3 color = glm::vec3(0.859, 0.439, 0.576);
+	Mesh* square = new Mesh("square");
+	vector<VertexFormat> vertices =
+	{
+		VertexFormat(glm::vec3(0, 0, 0), color),
+		VertexFormat(glm::vec3(1, 0, 0), color),
+		VertexFormat(glm::vec3(0, -1, 0), color),
+		VertexFormat(glm::vec3(1, -1, 0), color)
+	};
+	vector<unsigned short> indices =
+	{
+		0, 2, 1,
+		1, 2, 3
+	};
+	square->InitFromData(vertices, indices);
+	meshes["square"] = square;
+	return square;
+}
+
+Mesh* Tema2::DefineBlackSquare() {
+	glm::vec3 color = glm::vec3(1.000, 0.980, 0.980);
+	Mesh* square = new Mesh("black_square");
+	vector<VertexFormat> vertices =
+	{
+		VertexFormat(glm::vec3(0, 0, 0), color),
+		VertexFormat(glm::vec3(1, 0, 0), color),
+		VertexFormat(glm::vec3(0, -1, 0), color),
+		VertexFormat(glm::vec3(1, -1, 0), color)
+	};
+	vector<unsigned short> indices =
+	{
+		0, 2, 1,
+		1, 2, 3
+	};
+	square->InitFromData(vertices, indices);
+	meshes["black_square"] = square;
+	return square;
+}
+
 
 void Tema2::Init()
 {
@@ -58,6 +98,14 @@ void Tema2::Init()
 		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Primitives", "sphere.obj");
 		meshes[mesh->GetMeshID()] = mesh;
 	}
+
+	{
+		Mesh* mesh = DefineSquare(); //patrat folosit ulterior pentru fuel bar
+	}
+
+	{
+		Mesh* mesh = DefineBlackSquare(); //patrat folosit ulterior pentru fuel bar
+	}
 	//adauga un shader in vectorul shaders
 	Shader* shader = new Shader("colorShader");
 	shader->AddShader("Source/Laboratoare/Tema2/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -65,7 +113,6 @@ void Tema2::Init()
 	shader->CreateAndLink();
 	shaders["colorShader"] = shader;
 }
-
 
 void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
 {
@@ -154,7 +201,6 @@ void Tema2::setTranslatePoints()
 		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
 }
-
 
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ
 void Tema2::LoadPlatforms() {
@@ -422,9 +468,6 @@ void Tema2::LoadPlayer(float delta) {
 				glm::vec3(0, 1, 0));
 		}
 	}
-	else {
-
-	}
 }
 
 //inainte de a incepe jocul este redata o platforma de start
@@ -462,9 +505,44 @@ bool Tema2::checkCollision(int index) {
 			ok = true;
 		}
 	}
-
 	return ok;
 }
+
+void Tema2::renderFuelInformation(float deltaTimeSeconds) {
+	fuelValue -= 3.5f * deltaTimeSeconds;
+	/*	glm::vec3 fuelPos = glm::vec3(-10, -2, 0);
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		fuelValue -= 5 * deltaTimeSeconds;
+		modelMatrix *= Transform3D::Scale(fuelValue / initialFuelValue, 1, 1);
+		RenderSimpleMesh(meshes["square"], shaders["colorShader"], modelMatrix, glm::vec3(0.196, 0.804, 0.196));*/
+
+	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
+	glm::mat4 modelMatrix = glm::mat4(1);
+	
+	if (!thirdPersonCam)
+	{ //redare pentru modul firstPerson
+		modelMatrix *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue, 0.25f, 1.25f);
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+	}
+	else //redare pentru modul thirdPerson
+	{ 
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue , 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+	}
+}
+
 
 void Tema2::Update(float deltaTimeSeconds)
 {
@@ -487,6 +565,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
 	LoadPlatforms();
 	LoadPlayer(deltaTimeSeconds);
+	renderFuelInformation(deltaTimeSeconds);
 
 	int i;
 	bool checkPlayerPos = true;
@@ -507,7 +586,7 @@ void Tema2::Update(float deltaTimeSeconds)
 			}
 		}
 	}
-
+	
 
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
 	if (renderCameraTarget)
