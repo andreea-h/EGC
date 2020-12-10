@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Platform.h"
 #include "Player.h"
+#include <time.h>
 
 class Tema2 : public SimpleScene
 {
@@ -13,7 +14,6 @@ public:
 	void Init() override;
 
 private:
-	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix);
 	void LoadPlatforms(); //incarca in scena platformele
 	void LoadPlayer(float delta);
 	void setTranslatePoints();
@@ -85,4 +85,12 @@ private:
 
 	float initialFuelValue = 250.0f; //cantitate initiala de combustibil (si maxima)
 	float fuelValue = initialFuelValue; //cantitatea curenta de combustibil de care dispune 
+
+	bool collideCheck = false; //este true daca s-a produs coliziune jucator-platforma
+
+	bool gameOver = false; //devine true la coliziunea cu o platforma rosie
+	float prizeFactor; //factorul aditional de translatie adaugat la aterizarea pe o platforma portocalie
+	float finalTime; //momentul la care trebuie sa inceteze efectul dat de platforma portocalie
+	bool orangeAbility; //este true daca este activata abilitatea data de  platforma orange
+	clock_t startMom; //momentul de start al aplicatii abilitatii
 };

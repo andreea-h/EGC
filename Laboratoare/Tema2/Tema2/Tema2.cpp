@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include <time.h> 
 #include <Core/Engine.h>
 
 using namespace std;
@@ -133,6 +133,9 @@ void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 	int timeLoc = glGetUniformLocation(shader->program, "time");
 	glUniform1f(timeLoc, Engine::GetElapsedTime());
 
+	srand(time(NULL));
+	int randVal = glGetUniformLocation(shader->program, "rand");
+	glUniform1f(randVal, rand() % 100 + 10);
 
 	// Set shader uniforms for light & material properties
 	// TODO: Set light position uniform
@@ -179,7 +182,7 @@ void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema2::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(1.000, 0.855, 0.725, 1);
+	glClearColor(0.400, 0.804, 0.667, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -212,39 +215,6 @@ void Tema2::setTranslatePoints()
 	for (i = 6; i < 9; i++) {
 		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
-}
-
-void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
-{
-	if (!mesh || !shader || !shader->GetProgramID())
-		return;
-
-	// render an object using the specified shader and the specified position
-	glUseProgram(shader->program);//foloseste shader-ul 
-
-	int timeLoc = glGetUniformLocation(shader->program, "time");
-	glUniform1f(timeLoc, Engine::GetElapsedTime());
-
-	// TODO : get shader location for uniform mat4 "Model"
-	// TODO : set shader uniform "Model" to modelMatrix
-	int modelMatrixLocation = glGetUniformLocation(shader->program, "Model");
-	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-	// TODO : get shader location for uniform mat4 "View"
-	// TODO : set shader uniform "View" to viewMatrix
-	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-	int viewMatrixLocation = glGetUniformLocation(shader->program, "View");
-	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
-	// TODO : get shader location for uniform mat4 "Projection"
-	// TODO : set shader uniform "Projection" to projectionMatrix
-	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
-	int projectionMatrixLocation = glGetUniformLocation(shader->program, "Projection");
-	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-
-	// Draw the object
-	glBindVertexArray(mesh->GetBuffers()->VAO);
-	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);//lanseaza in executie banda grafica
 }
 
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ
@@ -310,7 +280,6 @@ void Tema2::LoadPlatforms() {
 				maxSize = platforms->getPlatformSize(i);
 			}
 		}
-
 		platforms->setLastMaxPlatform(maxSize);
 		platforms->deletePlatform(0);
 		platforms->deletePlatform(0);
@@ -340,7 +309,7 @@ void Tema2::LoadPlayer(float delta) {
 			RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 			firstPersonCamPosition = glm::mat4(1);
-			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.55f);
 
 			targetPosition = firstPersonCamPosition;
 			targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -353,7 +322,7 @@ void Tema2::LoadPlayer(float delta) {
 			}
 		}
 	}
-	else if (jumping == false && moveLeft == false && moveRight == false) {
+	else if (jumping == false && moveLeft == false && moveRight == false) { //situatia in care pot avea loc coliziuni
 		glm::mat4 modelMatrix = glm::mat4(1);
 		glm::vec3 pos = player.getActualPlayerCoords();
 		modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
@@ -362,8 +331,12 @@ void Tema2::LoadPlayer(float delta) {
 		//salveaza coordonatele actuale ale jucatorului
 
 		player.setActualCoords(coords);
-
-		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+		if (collideCheck == false) {
+			RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+		}
+		else {
+			RenderSimpleMesh(meshes["sphere"], shaders["noiseShader"], modelMatrix, glm::vec3(1.000, 0.000, 1.000)); //magenta
+		}
 
 		firstPersonCamPosition = glm::mat4(1);
 		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
@@ -460,8 +433,7 @@ void Tema2::LoadPlayer(float delta) {
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
 
-		if (!thirdPersonCam)
-		{
+		if (!thirdPersonCam) {
 			camera->Set(firstPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
 				targetPosition * glm::vec4(0.f, 0.f, 0.f, 1.f),
 				glm::vec3(0, 1, 0));
@@ -497,12 +469,10 @@ void Tema2::LoadPlayer(float delta) {
 		//salveaza coordonatele actuale ale jucatorului
 
 		player.setActualCoords(coords);
-
 		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 		firstPersonCamPosition = glm::mat4(1);
 		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
-
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
 
@@ -554,14 +524,9 @@ bool Tema2::checkCollision(int index) {
 }
 
 void Tema2::renderFuelInformation(float deltaTimeSeconds) {
-	fuelValue -= 3.5f * deltaTimeSeconds;
-	/*	glm::vec3 fuelPos = glm::vec3(-10, -2, 0);
-		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
-		fuelValue -= 5 * deltaTimeSeconds;
-		modelMatrix *= Transform3D::Scale(fuelValue / initialFuelValue, 1, 1);
-		RenderSimpleMesh(meshes["square"], shaders["colorShader"], modelMatrix, glm::vec3(0.196, 0.804, 0.196));*/
-
+	if (fallingPlayer == false && start == true) {
+		fuelValue -= 3.5f * deltaTimeSeconds;
+	}
 	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
 	glm::mat4 modelMatrix = glm::mat4(1);
 	
@@ -588,61 +553,99 @@ void Tema2::renderFuelInformation(float deltaTimeSeconds) {
 	}
 }
 
-
 void Tema2::Update(float deltaTimeSeconds)
-{
+{	
+	clock_t endMom = clock() - startMom;
+	if (fallingPlayer == true) {
+		glClearColor(1.000, 0.855, 0.725, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	if (endMom >= 5000) {//5sec
+		orangeAbility = false;
+		prizeFactor = 0;
+	}
 	if (start == true && fallingPlayer == false) {
 		int i;
 		for (i = 0; i < 9; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds, i);
+			if (orangeAbility == true) {
+				prizeFactor = 4;
+			}
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds + prizeFactor * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
 			translateZ += 4.5f * deltaTimeSeconds;
 		}
 	}
 
-	if (translateZ <= 7) {
+	if (translateZ < 7) {
 		LoadStartPlatform();
 	}
-	else {//daca s-a deplasat suficient cat sa nu mai fie vizibila in scena, platforma de start nu mai este redata
+	else { //daca s-a deplasat suficient cat sa nu mai fie vizibila in scena, platforma de start nu mai este redata
 		play = true;
 	}
 
 	LoadPlatforms();
 	LoadPlayer(deltaTimeSeconds);
-	renderFuelInformation(deltaTimeSeconds);
 
 	int i;
 	bool checkPlayerPos = true;
 	for (i = 0; i < 9; i++) {
 		if (checkCollision(i) == true) {
+			//rosu->final joc
+			if (platforms->getPlatformColor(i) == glm::vec3(1, 0, 0)) {
+				gameOver = true;
+				start = false;
+				Engine::GetWindow()->Close();
+				cout << "Ai pierdut :(" << endl;
+			}
+			//acorda abilitati jucatorului pe baza culorii platformelor speciale
+			//galben->pierde combustibil
+			if (platforms->getPlatformColor(i) == glm::vec3(1, 1, 0)) {
+				cout << "Ai pierdut o parte din combustibil :(" << endl;
+				fuelValue -= 20;
+			}
+			//portocaliu->blocat la viteza mare
+			if (platforms->getPlatformColor(i) == glm::vec3(1.000, 0.647, 0.000)) {
+				orangeAbility = true;
+				startMom = clock();
+			}
+			//verde->recupereaza combustibil
+			if (platforms->getPlatformColor(i) == glm::vec3(0.000, 0.502, 0.000)) {
+				fuelValue += 20;
+				cout << "Ai recuperat o parte din combustibil :)" << endl;
+			}
 			platforms->setPlatformColor(i);
 			//schimba culoarea platformei
 			checkPlayerPos = false;
+			collideCheck = true;
 		}
 	}
+
+	if (fuelValue <= 0) { //stop joc la terminarea combustibilului
+		gameOver = true;
+		Engine::GetWindow()->Close();
+		cout << "Combustibil epuizat :(" << endl;
+	}
+
+	renderFuelInformation(deltaTimeSeconds);
 	//daca jucatorul nu are coliziune cu nicio platforma iar jocul nu este in nicio situatie speciala
 	//(inainte de start joc, saritura la apasarea space, deplasare stanga-dreapta), atunci este 'activata' animatia de cadere a mingii
-
 	if (checkPlayerPos == true) {
+		collideCheck = false; //nicio coliziune
 		if (jumping == false && moveLeft == false && moveRight == false) {
 			if (play == true) {
 				fallingPlayer = true;
 			}
 		}
 	}
-	
-
 	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
-	if (renderCameraTarget)
-	{
+	if (renderCameraTarget) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
 		RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
 	}
 }
-
 
 void Tema2::FrameEnd()
 {
@@ -659,7 +662,6 @@ void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
 	glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
 	glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
 	mesh->Render();
 }
 
@@ -667,10 +669,8 @@ void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
 	// move the camera only if MOUSE_RIGHT button is pressed
-	if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT))
-	{
+	if (window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
 		float cameraSpeed = 2.0f;
-
 		if (window->KeyHold(GLFW_KEY_W)) {
 			// TODO : translate the camera forward
 			camera->MoveForward(cameraSpeed * deltaTime);
@@ -701,21 +701,23 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 			camera->TranslateUpword(cameraSpeed * deltaTime);
 		}
 	}
-	
-	if (window->KeyHold(GLFW_KEY_W)) { //mareste viteza de deplasare a platformelor
-		int i;
-		for (i = 0; i < 9; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 1.75 * deltaTime, i);
+	if (window->KeyHold(GLFW_KEY_W)) { //mareste viteza de deplasare a platformelor 
+		if (orangeAbility == false) {
+			int i;
+			for (i = 0; i < 9; i++) {
+				platforms->setTranslateVal(platforms->getTranslateVal(i) + 1.75 * deltaTime, i);
+			}
 		}
 	}
 
 	if (window->KeyHold(GLFW_KEY_S)) { //scade viteza de deplasare a platformelor
-		int i;
-		for (i = 0; i < 9; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) - 1.25f * deltaTime, i);
+		if (orangeAbility == false) {
+			int i;
+			for (i = 0; i < 9; i++) {
+				platforms->setTranslateVal(platforms->getTranslateVal(i) - 1.25f * deltaTime, i);
+			}
 		}
 	}
-
 }
 
 void Tema2::OnKeyPress(int key, int mods)
@@ -726,23 +728,18 @@ void Tema2::OnKeyPress(int key, int mods)
 	}
 
 	if (key == GLFW_KEY_C){
-		if (!thirdPersonCam)
-		{
+		if (!thirdPersonCam) {
 			camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 		}
-		
 		thirdPersonCam = !thirdPersonCam;
-		
 	}
 
 	if (key == GLFW_KEY_A) {//deplaseaza jucatorul
 		moveLeft = true;
-		//player.setXCoord(player.getXCoord() - 2.25f);
 	}
 
 	if (key == GLFW_KEY_D) {
 		moveRight = true;
-		//player.setXCoord(player.getXCoord() + 2.25f);
 	}
 
 	if (key == GLFW_KEY_SPACE){
@@ -777,7 +774,6 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 				camera->RotateFirstPerson_OY(-deltaX * sensivityOY);
 			}
 		}
-
 		if (window->GetSpecialKeyState() && GLFW_MOD_CONTROL) {
 			renderCameraTarget = true;
 			// TODO : rotate the camera in Third-person mode around OX and OY using deltaX and deltaY

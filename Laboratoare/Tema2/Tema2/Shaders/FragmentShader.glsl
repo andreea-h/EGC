@@ -1,5 +1,4 @@
 #version 330
-
 // TODO: get values from fragment shader
 in vec3 fNormal;
 in vec3 fColor;

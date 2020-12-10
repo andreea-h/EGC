@@ -1,5 +1,4 @@
 #version 330
-
 // atributele de intrare pentru VertexShader
 // TODO: get vertex attributes from each location
 layout (location =0) in vec3 v_position;

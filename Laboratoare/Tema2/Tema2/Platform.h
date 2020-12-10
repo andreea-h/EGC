@@ -19,7 +19,6 @@ public:
 	glm::vec3 getPlatformColor(int index);
 	void setTranslateVal(float z, int i);
 	float getTranslateVal(int index);
-	void generate3NewPlat(int index);
 	void generateNewPlatforms();
 	void setTranslatePoint(int i, float val);
 	float getTranslatePoint(int i);
