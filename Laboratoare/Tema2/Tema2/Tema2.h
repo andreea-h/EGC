@@ -13,6 +13,7 @@ public:
 	void Init() override;
 
 private:
+	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix);
 	void LoadPlatforms(); //incarca in scena platformele
 	void LoadPlayer(float delta);
 	void setTranslatePoints();
@@ -21,6 +22,7 @@ private:
 	void renderFuelInformation(float deltaTimeSeconds);
 	Mesh* DefineSquare();
 	Mesh* DefineBlackSquare();
+
 
 
 	void FrameStart() override;

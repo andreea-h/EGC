@@ -106,12 +106,20 @@ void Tema2::Init()
 	{
 		Mesh* mesh = DefineBlackSquare(); //patrat folosit ulterior pentru fuel bar
 	}
-	//adauga un shader in vectorul shaders
+
+	//adauga un shader pentru aplicarea culorii in vectorul shaders
 	Shader* shader = new Shader("colorShader");
 	shader->AddShader("Source/Laboratoare/Tema2/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
 	shader->AddShader("Source/Laboratoare/Tema2/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
 	shader->CreateAndLink();
 	shaders["colorShader"] = shader;
+
+	//adauga un shader cu aplicarea unei functii de zgomot
+	Shader* shader1 = new Shader("noiseShader");
+	shader1->AddShader("Source/Laboratoare/Tema2/Shaders/NoiseShaderVS.glsl", GL_VERTEX_SHADER);
+	shader1->AddShader("Source/Laboratoare/Tema2/Shaders/NoiseShaderFS.glsl", GL_FRAGMENT_SHADER);
+	shader1->CreateAndLink();
+	shaders["noiseShader"] = shader1;
 }
 
 void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
@@ -121,6 +129,10 @@ void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 
 	// render an object using the specified shader and the specified position
 	glUseProgram(shader->program);
+
+	int timeLoc = glGetUniformLocation(shader->program, "time");
+	glUniform1f(timeLoc, Engine::GetElapsedTime());
+
 
 	// Set shader uniforms for light & material properties
 	// TODO: Set light position uniform
@@ -200,6 +212,39 @@ void Tema2::setTranslatePoints()
 	for (i = 6; i < 9; i++) {
 		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
 	}
+}
+
+void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
+{
+	if (!mesh || !shader || !shader->GetProgramID())
+		return;
+
+	// render an object using the specified shader and the specified position
+	glUseProgram(shader->program);//foloseste shader-ul 
+
+	int timeLoc = glGetUniformLocation(shader->program, "time");
+	glUniform1f(timeLoc, Engine::GetElapsedTime());
+
+	// TODO : get shader location for uniform mat4 "Model"
+	// TODO : set shader uniform "Model" to modelMatrix
+	int modelMatrixLocation = glGetUniformLocation(shader->program, "Model");
+	glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+	// TODO : get shader location for uniform mat4 "View"
+	// TODO : set shader uniform "View" to viewMatrix
+	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
+	int viewMatrixLocation = glGetUniformLocation(shader->program, "View");
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+	// TODO : get shader location for uniform mat4 "Projection"
+	// TODO : set shader uniform "Projection" to projectionMatrix
+	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
+	int projectionMatrixLocation = glGetUniformLocation(shader->program, "Projection");
+	glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+	// Draw the object
+	glBindVertexArray(mesh->GetBuffers()->VAO);
+	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);//lanseaza in executie banda grafica
 }
 
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ

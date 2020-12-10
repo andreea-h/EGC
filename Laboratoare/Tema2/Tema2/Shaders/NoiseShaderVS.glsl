@@ -18,15 +18,19 @@ out vec3 fColor;
 out vec3 fPosition;
 out vec3 fCoord;
 
+uniform float time;
+
 void main()
 {
-	
 	// TODO: send output to fragment shader
 	fPosition = v_position;
 	fCoord = text_coord;
 	fNormal = v_normal;
 	fColor = v_color;
+
+    vec3 newPos = vec3(v_position.x + sin(v_position.y * 20 + 10 * time) * 0.1, v_position.y, v_position.z);
+
 	// TODO: compute gl_Position
 	// pozitia in clip space a vertexului primit
-	gl_Position = Projection * View * Model * vec4(v_position, 1.0);
+	gl_Position = Projection * View * Model * vec4(newPos, 1.0);
 }
