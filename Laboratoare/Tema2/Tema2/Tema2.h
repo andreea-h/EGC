@@ -22,7 +22,9 @@ private:
 	void renderFuelInformation(float deltaTimeSeconds);
 	Mesh* DefineSquare();
 	Mesh* DefineBlackSquare();
-
+	Mesh* CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
+	Mesh* Tema2::CreateStar();
+	void LoadStars();
 
 
 	void FrameStart() override;
@@ -93,4 +95,6 @@ private:
 	float finalTime; //momentul la care trebuie sa inceteze efectul dat de platforma portocalie
 	bool orangeAbility; //este true daca este activata abilitatea data de  platforma orange
 	clock_t startMom; //momentul de start al aplicatii abilitatii
+	float diffFactor; //combustibilul se termina mai repede o data cu cresterea dificulatii jocului
+	int lives = 3; //numar initial de vieti
 };

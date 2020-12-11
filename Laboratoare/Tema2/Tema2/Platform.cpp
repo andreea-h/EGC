@@ -30,7 +30,7 @@ float randGenerator(float a, float b) {
 }
 
 int genColor() {
-	int color = rand() % 5 + 1; //numar din intervalul [1, 5]
+	int color = rand() % 7 + 1; //numar din intervalul [1, 7]
 	return color;
 }
 
@@ -87,6 +87,12 @@ void Platform::generatePlatform() {
 		else if (color == 5) { //albastru
 			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
 		}
+		else if (color == 6) {//hotpink->recapatare viata
+			colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+		}
+		else if (color == 7) {//ladender->pierdere viata
+			colors.push_back(glm::vec3(0.902, 0.902, 0.980));
+		}
 	}
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
 	float maxLength = -999;
@@ -116,6 +122,12 @@ void Platform::generatePlatform() {
 			else if (color == 5) { //albastru
 				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
 			}
+			else if (color == 6) {//hotpink->recapatare viata
+				colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+			}
+			else if (color == 7) {//ladender->pierdere viata
+				colors.push_back(glm::vec3(0.902, 0.902, 0.980));
+			}
 		}
 	}
 
@@ -141,6 +153,12 @@ void Platform::generatePlatform() {
 		}
 		else if (color == 5) { //albastru
 			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
+		}
+		else if (color == 6) {//hotpink->recapatare viata
+			colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+		}
+		else if (color == 7) {//ladender->pierdere viata
+			colors.push_back(glm::vec3(0.902, 0.902, 0.980));
 		}
 	}
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
@@ -171,6 +189,12 @@ void Platform::generatePlatform() {
 			else if (color == 5) { //albastru
 				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
 			}
+			else if (color == 6) {//hotpink->recapatare viata
+				colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+			}
+			else if (color == 7) {//ladender->pierdere viata
+				colors.push_back(glm::vec3(0.902, 0.902, 0.980));
+			}
 		}
 	}
 
@@ -195,6 +219,12 @@ void Platform::generatePlatform() {
 		}
 		else if (color == 5) { //albastru
 			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
+		}
+		else if (color == 6) {//hotpink->recapatare viata
+			colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+		}
+		else if (color == 7) {//ladender->pierdere viata
+			colors.push_back(glm::vec3(0.902, 0.902, 0.980));
 		}
 	}
 	//verifica ca platforma cea mai lunga de pe fiecare rand sa nu fie rosie
@@ -225,6 +255,12 @@ void Platform::generatePlatform() {
 			else if (color == 5) { //albastru
 				colors[pos] = (glm::vec3(0.118, 0.565, 1.000));
 			}
+			else if (color == 6) {//hotpink->recapatare viata
+				colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+			}
+			else if (color == 7) {//ladender->pierdere viata
+				colors.push_back(glm::vec3(0.902, 0.902, 0.980));
+			}
 		}
 	}
 }
@@ -253,6 +289,12 @@ void Platform::generateNewPlatforms()
 		}
 		else if (color == 5) { //albastru
 			colors.push_back(glm::vec3(0.118, 0.565, 1.000));
+		}
+		else if (color == 6) {//hotpink->recapatare viata
+			colors.push_back(glm::vec3(1.000, 0.412, 0.706)); 
+		}
+		else if (color == 7) {//ladender->pierdere viata
+			colors.push_back(glm::vec3(0.902, 0.902, 0.980));
 		}
 		zCoords.push_back(0);
 		xCoords.push_back(0);
@@ -287,6 +329,12 @@ void Platform::generateNewPlatforms()
 			}
 			else if (color == 5) { //albastru
 				colors[pos] = glm::vec3(0.118, 0.565, 1.000);
+			}
+			else if (color == 6) {//hotpink->recapatare viata
+				colors.push_back(glm::vec3(1.000, 0.412, 0.706));
+			}
+			else if (color == 7) {//ladender->pierdere viata
+				colors.push_back(glm::vec3(0.902, 0.902, 0.980));
 			}
 		}
 	}

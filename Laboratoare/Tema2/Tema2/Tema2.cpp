@@ -1,5 +1,6 @@
 #include "Tema2.h"
 #include "Transform3D.h"
+#include "Transform2D.h"
 
 #include <vector>
 #include <string>
@@ -11,6 +12,7 @@ using namespace std;
 
 Tema2::Tema2()
 {
+	Mesh* star = CreateStar();
 	FoV = 45.0f;
 	//defineste pozitia initiala a camerei
 	thirdPersonCamPosition = glm::mat4(1);
@@ -20,7 +22,7 @@ Tema2::Tema2()
 	//defineste pozitia camerei firstPerson
 	firstPersonCamPosition = glm::mat3(1);
 	glm::vec3 pos = player.getInitialPlayerCoords();
-	firstPersonCamPosition *= Transform3D::Translate(pos.x, pos.y, pos.z - 0.5f);
+	firstPersonCamPosition *= Transform3D::Translate(pos.x, pos.y, pos.z - 0.75f);
 	
 	targetPosition = firstPersonCamPosition;
 	targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -29,7 +31,6 @@ Tema2::Tema2()
 	camera = new Tema_2::Camera();
 	camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 
-	
 	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
 
 	platforms = new Platform();
@@ -120,6 +121,93 @@ void Tema2::Init()
 	shader1->AddShader("Source/Laboratoare/Tema2/Shaders/NoiseShaderFS.glsl", GL_FRAGMENT_SHADER);
 	shader1->CreateAndLink();
 	shaders["noiseShader"] = shader1;
+}
+
+Mesh* Tema2::CreateStar() {
+	Mesh* star = new Mesh("star");
+	vector<VertexFormat> vertices =
+	{
+		VertexFormat(glm::vec3(-0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(0, 2, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(0, -2, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(-0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(-2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
+	};
+
+	vector<unsigned short> indices =
+	{
+		0, 2, 1,
+		7, 6, 0,
+		2, 4, 3,
+		6, 5, 4,
+		0, 6, 4,
+		2, 0, 4
+	};
+	star = CreateMesh("star", vertices, indices);
+	return star;
+}
+
+Mesh* Tema2::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices)
+{
+	unsigned int VAO = 0;
+	// TODO: Create the VAO and bind it
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	// TODO: Create the VBO and bind it
+	unsigned int VBO = 0;
+	glGenBuffers(1, &VBO);
+
+	// TODO: Send vertices data into the VBO buffer
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//trimite date la vbo-ul activ
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// TODO: Crete the IBO and bind it
+	unsigned int IBO = 0;
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+	// TODO: Send indices data into the IBO buffer
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),
+		&indices[0], GL_STATIC_DRAW);
+
+	// ========================================================================
+	// This section describes how the GPU Shader Vertex Shader program receives data
+	// It will be learned later, when GLSL shaders will be introduced
+	// For the moment just think that each property value from our vertex format needs to be send to a certain channel
+	// in order to know how to receive it in the GLSL vertex shader
+
+	// set vertex position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
+
+	// set vertex normal attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
+
+	// set texture coordinate attribute
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
+
+	// set vertex color attribute
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
+	// ========================================================================
+
+	// TODO: Unbind the VAO
+	glBindVertexArray(0); //dezactiveaza legatura catre VAO-ul curent
+
+	// Check for OpenGL errors
+	CheckOpenGLError();
+
+	// Mesh information is saved into a Mesh object
+	meshes[name] = new Mesh(name);
+	meshes[name]->InitFromBuffer(VAO, static_cast<unsigned short>(indices.size()));
+	return meshes[name];
 }
 
 void Tema2::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
@@ -217,6 +305,16 @@ void Tema2::setTranslatePoints()
 	}
 }
 
+void Tema2::LoadStars() {
+	int i;
+	for (i = 0; i < lives; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3 + i, 3.5f, -7.5f);
+		modelMatrix *= Transform3D::Scale(0.1, 0.1, 0.1);
+		RenderMesh(meshes["star"], shaders["VertexColor"], modelMatrix);
+	}
+}
+
 //cuburile nou generate vor fi mereu afisate la aceeasi distanta de jucator pe axa OZ
 void Tema2::LoadPlatforms() {
 	int i;
@@ -309,7 +407,7 @@ void Tema2::LoadPlayer(float delta) {
 			RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 			firstPersonCamPosition = glm::mat4(1);
-			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.55f);
+			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
 
 			targetPosition = firstPersonCamPosition;
 			targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -339,7 +437,7 @@ void Tema2::LoadPlayer(float delta) {
 		}
 
 		firstPersonCamPosition = glm::mat4(1);
-		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
 
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -383,7 +481,7 @@ void Tema2::LoadPlayer(float delta) {
 		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 		firstPersonCamPosition = glm::mat4(1);
-		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
 
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -428,7 +526,7 @@ void Tema2::LoadPlayer(float delta) {
 		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 		firstPersonCamPosition = glm::mat4(1);
-		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
 
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -472,7 +570,7 @@ void Tema2::LoadPlayer(float delta) {
 		RenderSimpleMesh(meshes["sphere"], shaders["colorShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 		firstPersonCamPosition = glm::mat4(1);
-		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.25f);
+		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
 		targetPosition = firstPersonCamPosition;
 		targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
 
@@ -524,8 +622,9 @@ bool Tema2::checkCollision(int index) {
 }
 
 void Tema2::renderFuelInformation(float deltaTimeSeconds) {
+	diffFactor += 0.03;
 	if (fallingPlayer == false && start == true) {
-		fuelValue -= 3.5f * deltaTimeSeconds;
+		fuelValue -= (3.5f + diffFactor) * deltaTimeSeconds;
 	}
 	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
 	glm::mat4 modelMatrix = glm::mat4(1);
@@ -555,6 +654,7 @@ void Tema2::renderFuelInformation(float deltaTimeSeconds) {
 
 void Tema2::Update(float deltaTimeSeconds)
 {	
+	LoadStars();
 	clock_t endMom = clock() - startMom;
 	if (fallingPlayer == true) {
 		glClearColor(1.000, 0.855, 0.725, 1);
@@ -614,6 +714,17 @@ void Tema2::Update(float deltaTimeSeconds)
 				fuelValue += 20;
 				cout << "Ai recuperat o parte din combustibil :)" << endl;
 			}
+			//jucatorul poate sa ramana de countLives ori fara vieti
+			//hotpink->primeste o viata in plus
+			if (platforms->getPlatformColor(i) == glm::vec3(1.000, 0.412, 0.706)) {
+				lives++;
+				cout << "Ai primit o viata in plus :) Numar actual vieti: " << lives << endl;
+			}
+			//lavander->pierde o viata
+			if (platforms->getPlatformColor(i) == glm::vec3(0.902, 0.902, 0.980)) {
+				lives--;
+				cout << "Ai pierdut o viata :(  Numar actual vieti: " << lives << endl;
+			}
 			platforms->setPlatformColor(i);
 			//schimba culoarea platformei
 			checkPlayerPos = false;
@@ -621,10 +732,16 @@ void Tema2::Update(float deltaTimeSeconds)
 		}
 	}
 
-	if (fuelValue <= 0) { //stop joc la terminarea combustibilului
-		gameOver = true;
-		Engine::GetWindow()->Close();
-		cout << "Combustibil epuizat :(" << endl;
+	if (fuelValue <= 0) { //verifica numarul de vieiti la terminarea combustibilului
+		lives--;
+		if (lives == 0) {
+			gameOver = true;
+			Engine::GetWindow()->Close();
+			cout << "Combustibil epuizat :(" << endl;
+		}
+		else {
+			fuelValue = initialFuelValue; //reinitializeaza combustibilul
+		}
 	}
 
 	renderFuelInformation(deltaTimeSeconds);
