@@ -19,14 +19,20 @@ private:
 	void setTranslatePoints();
 	void LoadStartPlatform();
 	bool checkCollision(int index);
-	void renderFuelInformation(float deltaTimeSeconds);
 	Mesh* DefineSquare();
 	Mesh* DefineBlackSquare();
 	Mesh* CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
 	Mesh* CreateStar();
 	void LoadStars();
 	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1);
+	void LoadMeshes();
+	void LoadShaders();
+	void LoadDecorElements();
+	void LoadTextures();
+	Mesh* CreateStylisedCube();
 
+
+	Texture2D* CreateTexture(unsigned int width, unsigned int height);
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;

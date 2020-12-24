@@ -86,10 +86,39 @@ Mesh* Tema3::DefineBlackSquare() {
 	return square;
 }
 
-
-void Tema3::Init()
+Texture2D* Tema3::CreateTexture(unsigned int width, unsigned int height)
 {
-	//load meshes
+	GLuint textureID = 0;
+	unsigned int channels = 3;
+	unsigned int size = width * height * channels;
+	unsigned char* data = new unsigned char[size];
+
+	glGenTextures(1, &textureID);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	CheckOpenGLError();
+
+	int i;
+	for (i = 0; i < 5; i++) {
+		//GL_TEXTURE_CUBE_MAP_POSITIVE_X + i reprezinta pe rand fetele cubului
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	}
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	CheckOpenGLError();
+
+	// Save the texture into a wrapper Texture2D class for using easier later during rendering phase
+	Texture2D* texture = new Texture2D();
+	texture->Init(textureID, width, height, channels);
+
+	SAFE_FREE_ARRAY(data);
+	return texture;
+}
+
+void Tema3::LoadMeshes() {
 	{
 		Mesh* mesh = new Mesh("box");
 		mesh->LoadMesh(RESOURCE_PATH::MODELS + "Primitives", "box.obj");
@@ -110,6 +139,32 @@ void Tema3::Init()
 		Mesh* mesh = DefineBlackSquare(); //patrat folosit ulterior pentru fuel bar
 	}
 
+	{
+		vector<VertexFormat> vertices_tetraedru
+		{
+			VertexFormat(glm::vec3(0, 0, 0), glm::vec3(0.125, 0.698, 0.667)),
+			VertexFormat(glm::vec3(0.5f, 0, 0.86f), glm::vec3(0.275, 0.510, 0.706)),
+			VertexFormat(glm::vec3(1, 0, 0), glm::vec3(0.498, 1.000, 0.831)),
+			VertexFormat(glm::vec3(0.5f, 1, 0.28f), glm::vec3(0.000, 0.000, 1.000))
+		};
+
+		vector<unsigned short> indices_tetraedru
+		{
+			0, 1, 3,
+			1, 2, 3,
+			0, 2, 1,
+			0, 3, 2
+		};
+		Mesh* tetraedru = new Mesh("tetraedru");
+		tetraedru->InitFromData(vertices_tetraedru, indices_tetraedru);
+		meshes[tetraedru->GetMeshID()] = tetraedru;
+	}
+
+	Mesh* cube = CreateStylisedCube();
+	meshes[cube->GetMeshID()] = cube;
+}
+
+void Tema3::LoadShaders() {
 	//adauga un shader pentru aplicarea culorii in vectorul shaders
 	Shader* shader = new Shader("colorShader");
 	shader->AddShader("Source/Laboratoare/Tema3/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -123,7 +178,9 @@ void Tema3::Init()
 	shader1->AddShader("Source/Laboratoare/Tema3/Shaders/NoiseShaderFS.glsl", GL_FRAGMENT_SHADER);
 	shader1->CreateAndLink();
 	shaders["noiseShader"] = shader1;
+}
 
+void Tema3::LoadTextures() {
 	//load textures
 	{
 		const string textureLoc = "Source/Laboratoare/Tema3/Textures/grass1.jpg";
@@ -131,9 +188,24 @@ void Tema3::Init()
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["grass"] = texture;
 	}
+	
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/scoarta_copac.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["copac"] = texture;
+	}
+}
+
+void Tema3::Init()
+{
+	LoadMeshes();
+	LoadShaders();
+	LoadTextures();
 }
 
 Mesh* Tema3::CreateStar() {
+
 	Mesh* star = new Mesh("star");
 	vector<VertexFormat> vertices =
 	{
@@ -160,36 +232,153 @@ Mesh* Tema3::CreateStar() {
 	return star;
 }
 
+Mesh* Tema3::CreateStylisedCube() {
+
+	std::vector<glm::vec3> vertices =
+	{
+		glm::vec3(0, 0, 1),
+		glm::vec3(1, 0, 1),
+		glm::vec3(0, 1, 1),
+		glm::vec3(1, 1, 1),
+		glm::vec3(0, 0, 0),
+		glm::vec3(1, 0, 0), 
+		glm::vec3(0, 1, 0),
+		glm::vec3(1, 1, 0),
+
+		glm::vec3(0, 0, 1),
+		glm::vec3(1, 0, 1),
+		glm::vec3(0, 1, 1),
+		glm::vec3(1, 1, 1),
+		glm::vec3(0, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(1, 1, 0),
+
+		glm::vec3(0, 0, 1),
+		glm::vec3(1, 0, 1),
+		glm::vec3(0, 1, 1),
+		glm::vec3(1, 1, 1),
+		glm::vec3(0, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(0, 1, 0),
+		glm::vec3(1, 1, 0),
+	};
+
+	std::vector<unsigned short> indices = { 
+			0, 1, 2,	
+			1, 3, 2,
+
+			10, 11, 15,
+			10, 15, 14,
+	
+			17, 23, 19,
+			17, 21, 23,
+
+			6, 7, 4,
+			7, 5, 4, 
+
+			8, 12, 9, 
+			9, 12, 13,
+
+			18, 22, 20,  
+			16, 18, 20
+	};
+
+	std::vector<glm::vec3> normals
+	{
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 0, 0),
+
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 0, -1),
+
+		glm::vec3(0, -1, 0),//8
+		glm::vec3(0, -1, 0),//9
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0),
+
+		glm::vec3(0, -1, 0),//12
+		glm::vec3(0, -1, 0),//13
+		glm::vec3(0, 1, 0),
+		glm::vec3(0, 1, 0),
+
+		glm::vec3(-1, 0, 0),//16
+		glm::vec3(1, 0, 0),//17
+		glm::vec3(-1, 0, 0),//18
+		glm::vec3(1, 0, 0),//19
+
+		glm::vec3(-1, 0, 0),//20
+		glm::vec3(1, 0, 0),//21
+		glm::vec3(-1, 0, 0),//22
+		glm::vec3(1, 0, 0)//23
+	};
+
+	std::vector<glm::vec2> textureCoords
+	{
+		glm::vec2(0.f, 0.f),
+		glm::vec2(1.f, 0.f),
+		glm::vec2(0.f, 1.f),
+		glm::vec2(1.f, 1.f),
+
+		glm::vec2(0.f, 0.f),
+		glm::vec2(1.f, 0.f),
+		glm::vec2(0.f, 1.f),
+		glm::vec2(1.f, 1.f),
+
+		//8, 9, 12, 13 - fata de jos a cubului
+		//10, 11, 14, 15 - fata de sus a cubului
+		glm::vec2(0.f, 0.f),//8
+		glm::vec2(1.f, 0.f),//9
+		glm::vec2(0.f, 0.f),//10
+		glm::vec2(1.f, 0.f),//11
+
+		glm::vec2(0.f, 1.f),//12
+		glm::vec2(1.f, 1.f),//13
+		glm::vec2(0.f, 1.f),//14
+		glm::vec2(1.f, 1.f),//15
+
+		//fetele laterale ale cubului
+		//fata laterala din stanga - 16, 20, 18, 22
+		//fata laterala din dreapta - 17, 19, 21, 23
+		glm::vec2(0.f, 0.f), //16
+		glm::vec2(0.f, 0.f),
+		glm::vec2(0.f, 1.f), //18
+		glm::vec2(0.f, 1.f),
+
+		glm::vec2(1.f, 0.f),//20
+		glm::vec2(1.f, 0.f),
+		glm::vec2(1.f, 1.f),//22
+		glm::vec2(1.f, 1.f)
+	};
+
+	Mesh* cube = new Mesh("cub_stilizat");
+	cube->InitFromData(vertices, normals, textureCoords, indices);
+	return cube;
+}
+
 Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices)
 {
 	unsigned int VAO = 0;
-	// TODO: Create the VAO and bind it
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	// TODO: Create the VBO and bind it
 	unsigned int VBO = 0;
 	glGenBuffers(1, &VBO);
 
-	// TODO: Send vertices data into the VBO buffer
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	//trimite date la vbo-ul activ
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
-	// TODO: Crete the IBO and bind it
 	unsigned int IBO = 0;
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-	// TODO: Send indices data into the IBO buffer
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),
 		&indices[0], GL_STATIC_DRAW);
-
-	// ========================================================================
-	// This section describes how the GPU Shader Vertex Shader program receives data
-	// It will be learned later, when GLSL shaders will be introduced
-	// For the moment just think that each property value from our vertex format needs to be send to a certain channel
-	// in order to know how to receive it in the GLSL vertex shader
 
 	// set vertex position attribute
 	glEnableVertexAttribArray(0);
@@ -208,7 +397,6 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
 	// ========================================================================
 
-	// TODO: Unbind the VAO
 	glBindVertexArray(0); //dezactiveaza legatura catre VAO-ul curent
 
 	// Check for OpenGL errors
@@ -668,15 +856,39 @@ bool Tema3::checkCollision(int index) {
 	}
 	return ok;
 }
+//RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, mapTextures["grass"]);
+void Tema3::LoadDecorElements() {
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.5f, 2, platforms->getPlatformPos(0) - 4);
+	modelMatrix *= Transform3D::Scale(2, 4, 2);
+	modelMatrix *= Transform3D::RotateOX(2);
+	RenderSimpleMesh(meshes["cub_stilizat"], shaders["colorShader"], modelMatrix, mapTextures["grass"]);
 
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.5f, 2, platforms->getPlatformPos(0) - 9);
+	modelMatrix *= Transform3D::Scale(2, 2, 2);
+	RenderSimpleMesh(meshes["cub_stilizat"], shaders["colorShader"], modelMatrix, mapTextures["grass"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.5f, 2, platforms->getPlatformPos(0) - 15);
+	modelMatrix *= Transform3D::Scale(2, 2, 2);
+	RenderSimpleMesh(meshes["cub_stilizat"], shaders["colorShader"], modelMatrix, mapTextures["grass"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-4.5f, 2, platforms->getPlatformPos(0));
+	modelMatrix *= Transform3D::Scale(1, 4, 1);
+	RenderSimpleMesh(meshes["cub_stilizat"], shaders["colorShader"], modelMatrix, mapTextures["copac"]);
+}
 
 void Tema3::Update(float deltaTimeSeconds)
 {	
+	LoadDecorElements();
 	LoadStars();
 	
 	if (fallingPlayer == true) {
 		glClearColor(1.000, 0.855, 0.725, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		LoadDecorElements();
 	}
 
 	if (start == true && fallingPlayer == false) {
