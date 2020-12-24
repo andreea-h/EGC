@@ -27,7 +27,7 @@ private:
 	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1);
 	void LoadMeshes();
 	void LoadShaders();
-	void LoadDecorElements();
+	void LoadDecorElements(float time);
 	void LoadTextures();
 	Mesh* CreateStylisedCube();
 
@@ -107,4 +107,13 @@ private:
 
 
 	std::unordered_map<std::string, Texture2D*> mapTextures;
+
+	float translateDecor;
+	//memoreaza tranzitiile pentru trunchiurile de copaci de pe stanga si de pe dreapta
+	std::vector<float> translateRightDecorValues = std::vector<float>(5); 
+	std::vector<float> translateLeftDecorValues = std::vector<float>(5); 
+	
+	//memoreaza pozitiile 
+	std::vector<float> RightDecorPos = std::vector<float>(5);
+	std::vector<float> LeftDecorPos = std::vector<float>(5);
 };
