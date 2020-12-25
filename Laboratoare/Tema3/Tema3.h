@@ -19,20 +19,17 @@ private:
 	void setTranslatePoints();
 	void LoadStartPlatform();
 	bool checkCollision(int index);
+	void renderFuelInformation(float deltaTimeSeconds);
 	Mesh* DefineSquare();
 	Mesh* DefineBlackSquare();
-	Mesh* CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
-	Mesh* CreateStar();
+	Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
+	Mesh* Tema3::CreateStar();
 	void LoadStars();
-	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1);
+	void LoadTextures();
 	void LoadMeshes();
 	void LoadShaders();
-	void LoadDecorElements(float time);
-	void LoadTextures();
 	Mesh* CreateStylisedCube();
 
-
-	Texture2D* CreateTexture(unsigned int width, unsigned int height);
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -40,6 +37,7 @@ private:
 
 	void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix) override;
 	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color);
+	void RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture);
 
 	void OnInputUpdate(float deltaTime, int mods) override;
 	void OnKeyPress(int key, int mods) override;
@@ -105,14 +103,13 @@ private:
 	float diffFactor; //combustibilul se termina mai repede o data cu cresterea dificulatii jocului
 	int lives = 3; //numar initial de vieti
 
-
 	std::unordered_map<std::string, Texture2D*> mapTextures;
 
 	float translateDecor;
 	//memoreaza tranzitiile pentru trunchiurile de copaci de pe stanga si de pe dreapta
-	std::vector<float> translateRightDecorValues = std::vector<float>(5); 
-	std::vector<float> translateLeftDecorValues = std::vector<float>(5); 
-	
+	std::vector<float> translateRightDecorValues = std::vector<float>(5);
+	std::vector<float> translateLeftDecorValues = std::vector<float>(5);
+
 	//memoreaza pozitiile 
 	std::vector<float> RightDecorPos = std::vector<float>(5);
 	std::vector<float> LeftDecorPos = std::vector<float>(5);

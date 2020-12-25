@@ -8,7 +8,6 @@
 #include <time.h> 
 #include <Core/Engine.h>
 
-
 using namespace std;
 
 Tema3::Tema3()
@@ -86,38 +85,6 @@ Mesh* Tema3::DefineBlackSquare() {
 	return square;
 }
 
-Texture2D* Tema3::CreateTexture(unsigned int width, unsigned int height)
-{
-	GLuint textureID = 0;
-	unsigned int channels = 3;
-	unsigned int size = width * height * channels;
-	unsigned char* data = new unsigned char[size];
-
-	glGenTextures(1, &textureID);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	CheckOpenGLError();
-
-	int i;
-	for (i = 0; i < 5; i++) {
-		//GL_TEXTURE_CUBE_MAP_POSITIVE_X + i reprezinta pe rand fetele cubului
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	}
-	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4);
-
-	glGenerateMipmap(GL_TEXTURE_2D);
-	CheckOpenGLError();
-
-	// Save the texture into a wrapper Texture2D class for using easier later during rendering phase
-	Texture2D* texture = new Texture2D();
-	texture->Init(textureID, width, height, channels);
-
-	SAFE_FREE_ARRAY(data);
-	return texture;
-}
-
 void Tema3::LoadMeshes() {
 	{
 		Mesh* mesh = new Mesh("box");
@@ -164,98 +131,6 @@ void Tema3::LoadMeshes() {
 	meshes[cube->GetMeshID()] = cube;
 }
 
-void Tema3::LoadShaders() {
-	//adauga un shader pentru aplicarea culorii in vectorul shaders
-	{
-		Shader* shader = new Shader("textureShader");
-		shader->AddShader("Source/Laboratoare/Tema3/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
-		shader->AddShader("Source/Laboratoare/Tema3/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
-		shader->CreateAndLink();
-		shaders["textureShader"] = shader;
-	}
-	{
-		Shader* shader = new Shader("basicShader");
-		shader->AddShader("Source/Laboratoare/Tema3/Shaders/BasicVertexShader.glsl", GL_VERTEX_SHADER);
-		shader->AddShader("Source/Laboratoare/Tema3/Shaders/BasicFragmentShader.glsl", GL_FRAGMENT_SHADER);
-		shader->CreateAndLink();
-		shaders["basicShader"] = shader;
-	}
-	{
-		//adauga un shader cu aplicarea unei functii de zgomot
-		Shader* shader1 = new Shader("noiseShader");
-		shader1->AddShader("Source/Laboratoare/Tema3/Shaders/NoiseShaderVS.glsl", GL_VERTEX_SHADER);
-		shader1->AddShader("Source/Laboratoare/Tema3/Shaders/NoiseShaderFS.glsl", GL_FRAGMENT_SHADER);
-		shader1->CreateAndLink();
-		shaders["noiseShader"] = shader1;
-	}
-}
-
-void Tema3::LoadTextures() {
-	//load textures
-	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/grass1.jpg";
-		Texture2D* texture = new Texture2D();
-		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
-		mapTextures["grass"] = texture;
-	}
-	
-	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/scoarta_copac.jpg";
-		Texture2D* texture = new Texture2D();
-		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
-		mapTextures["copac"] = texture;
-	}
-
-	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra1.jpg";
-		Texture2D* texture = new Texture2D();
-		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
-		mapTextures["piatra"] = texture;
-	}
-
-	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra2.jpg";
-		Texture2D* texture = new Texture2D();
-		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
-		mapTextures["piatra2"] = texture;
-	}
-}
-
-void Tema3::Init()
-{
-	LoadMeshes();
-	LoadShaders();
-	LoadTextures();
-}
-
-Mesh* Tema3::CreateStar() {
-
-	Mesh* star = new Mesh("star");
-	vector<VertexFormat> vertices =
-	{
-		VertexFormat(glm::vec3(-0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
-		VertexFormat(glm::vec3(0, 2, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
-		VertexFormat(glm::vec3(2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
-		VertexFormat(glm::vec3(0, -2, 0), glm::vec3(0.502, 0.000, 0.502)),
-		VertexFormat(glm::vec3(-0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
-		VertexFormat(glm::vec3(-2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
-	};
-
-	vector<unsigned short> indices =
-	{
-		0, 2, 1,
-		7, 6, 0,
-		2, 4, 3,
-		6, 5, 4,
-		0, 6, 4,
-		2, 0, 4
-	};
-	star = CreateMesh("star", vertices, indices);
-	return star;
-}
-
 Mesh* Tema3::CreateStylisedCube() {
 
 	std::vector<glm::vec3> vertices =
@@ -265,7 +140,7 @@ Mesh* Tema3::CreateStylisedCube() {
 		glm::vec3(0, 1, 1),
 		glm::vec3(1, 1, 1),
 		glm::vec3(0, 0, 0),
-		glm::vec3(1, 0, 0), 
+		glm::vec3(1, 0, 0),
 		glm::vec3(0, 1, 0),
 		glm::vec3(1, 1, 0),
 
@@ -288,23 +163,23 @@ Mesh* Tema3::CreateStylisedCube() {
 		glm::vec3(1, 1, 0),
 	};
 
-	std::vector<unsigned short> indices = { 
-			0, 1, 2,	
+	std::vector<unsigned short> indices = {
+			0, 1, 2,
 			1, 3, 2,
 
 			10, 11, 15,
 			10, 15, 14,
-	
+
 			17, 23, 19,
 			17, 21, 23,
 
 			6, 7, 4,
-			7, 5, 4, 
+			7, 5, 4,
 
-			8, 12, 9, 
+			8, 12, 9,
 			9, 12, 13,
 
-			18, 22, 20,  
+			18, 22, 20,
 			16, 18, 20
 	};
 
@@ -384,25 +259,131 @@ Mesh* Tema3::CreateStylisedCube() {
 	return cube;
 }
 
+
+void Tema3::LoadShaders() {
+	//adauga un shader pentru aplicarea culorii in vectorul shaders
+	{
+		Shader* shader = new Shader("textureShader");
+		shader->AddShader("Source/Laboratoare/Tema3/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+		shader->AddShader("Source/Laboratoare/Tema3/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
+		shader->CreateAndLink();
+		shaders["textureShader"] = shader;
+	}
+	{
+		Shader* shader = new Shader("basicShader");
+		shader->AddShader("Source/Laboratoare/Tema3/Shaders/BasicVertexShader.glsl", GL_VERTEX_SHADER);
+		shader->AddShader("Source/Laboratoare/Tema3/Shaders/BasicFragmentShader.glsl", GL_FRAGMENT_SHADER);
+		shader->CreateAndLink();
+		shaders["basicShader"] = shader;
+	}
+	{
+		//adauga un shader cu aplicarea unei functii de zgomot
+		Shader* shader1 = new Shader("noiseShader");
+		shader1->AddShader("Source/Laboratoare/Tema3/Shaders/NoiseShaderVS.glsl", GL_VERTEX_SHADER);
+		shader1->AddShader("Source/Laboratoare/Tema3/Shaders/NoiseShaderFS.glsl", GL_FRAGMENT_SHADER);
+		shader1->CreateAndLink();
+		shaders["noiseShader"] = shader1;
+	}
+}
+
+void Tema3::LoadTextures() {
+	//load textures
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/grass1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["grass"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/scoarta_copac.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["copac"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["piatra"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra2.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["piatra2"] = texture;
+	}
+}
+
+void Tema3::Init()
+{
+	LoadMeshes();
+	LoadShaders();
+	LoadTextures();
+
+	player.setYCoord(0.80f);
+}
+
+
+Mesh* Tema3::CreateStar() {
+	Mesh* star = new Mesh("star");
+	vector<VertexFormat> vertices =
+	{
+		VertexFormat(glm::vec3(-0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(0, 2, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, 0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(0, -2, 0), glm::vec3(0.502, 0.000, 0.502)),
+		VertexFormat(glm::vec3(-0.5f, -0.5f, 0), glm::vec3(0.255, 0.412, 0.882)),
+		VertexFormat(glm::vec3(-2, 0, 0), glm::vec3(0.502, 0.000, 0.502)),
+	};
+
+	vector<unsigned short> indices =
+	{
+		0, 2, 1,
+		7, 6, 0,
+		2, 4, 3,
+		6, 5, 4,
+		0, 6, 4,
+		2, 0, 4
+	};
+	star = CreateMesh("star", vertices, indices);
+	return star;
+}
+
 Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices)
 {
 	unsigned int VAO = 0;
+	// TODO: Create the VAO and bind it
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
+	// TODO: Create the VBO and bind it
 	unsigned int VBO = 0;
 	glGenBuffers(1, &VBO);
 
+	// TODO: Send vertices data into the VBO buffer
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	//trimite date la vbo-ul activ
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
+	// TODO: Crete the IBO and bind it
 	unsigned int IBO = 0;
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
+	// TODO: Send indices data into the IBO buffer
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),
 		&indices[0], GL_STATIC_DRAW);
+
+	// ========================================================================
+	// This section describes how the GPU Shader Vertex Shader program receives data
+	// It will be learned later, when GLSL shaders will be introduced
+	// For the moment just think that each property value from our vertex format needs to be send to a certain channel
+	// in order to know how to receive it in the GLSL vertex shader
 
 	// set vertex position attribute
 	glEnableVertexAttribArray(0);
@@ -421,6 +402,7 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
 	// ========================================================================
 
+	// TODO: Unbind the VAO
 	glBindVertexArray(0); //dezactiveaza legatura catre VAO-ul curent
 
 	// Check for OpenGL errors
@@ -433,7 +415,7 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 }
 
 //render with textures
-void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
+void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
 {
 	if (!mesh || !shader || !shader->GetProgramID())
 		return;
@@ -458,7 +440,7 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 	glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 0);
-		
+
 	// Draw the object
 	glBindVertexArray(mesh->GetBuffers()->VAO);
 	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);
@@ -577,8 +559,15 @@ void Tema3::LoadPlatforms() {
 
 	for (i = 0; i < 3; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(2, 0.25f, platforms->getPlatformSize(i));
+		if (i != 1) {
+			modelMatrix *= Transform3D::Translate(2.85f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.35f, 0.25f, platforms->getPlatformSize(i));
+		}
+		else {
+			modelMatrix *= Transform3D::Translate(2.5f * (i - 1), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.15f, 0.25f, platforms->getPlatformSize(i));
+		}
+		
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
@@ -587,7 +576,7 @@ void Tema3::LoadPlatforms() {
 
 		//platformele care dispar in spatele camerei nu mai sunt redate
 		if (platforms->getPlatformPos(i) <= 2.5f) {
-			RenderSimpleMesh(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
 		}
 		else {
 			count++;
@@ -601,25 +590,37 @@ void Tema3::LoadPlatforms() {
 	//1.25f este distanta dintre platforme
 	for (i = 3; i < 6; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(2, 0.25f, platforms->getPlatformSize(i));
+		if (i != 4) {
+			modelMatrix *= Transform3D::Translate(2.85f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.35f, 0.25f, platforms->getPlatformSize(i));
+		}
+		else {
+			modelMatrix *= Transform3D::Translate(2.5f * (i - 4), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.15f, 0.25f, platforms->getPlatformSize(i));
+		}
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderSimpleMesh(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
 	}
 	for (i = 6; i < 9; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(2.5f * (i - 7), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
-		modelMatrix *= Transform3D::Scale(2, 0.25f, platforms->getPlatformSize(i));
+		if (i != 7) {
+			modelMatrix *= Transform3D::Translate(2.85f * (i - 7), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.35f, 0.25f, platforms->getPlatformSize(i));
+		}
+		else {
+			modelMatrix *= Transform3D::Translate(2.5f * (i - 7), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.15f, 0.25f, platforms->getPlatformSize(i));
+		}
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderSimpleMesh(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
 	}
 	
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
@@ -645,7 +646,6 @@ void Tema3::LoadPlayer(float delta) {
 	if (fallingPlayer == true) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		glm::vec3 pos = player.getActualPlayerCoords();
-		modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
 		modelMatrix *= Transform3D::Translate(pos.x, pos.y, pos.z);
 		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
 		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
@@ -709,7 +709,7 @@ void Tema3::LoadPlayer(float delta) {
 		glm::vec3 pos = player.getActualPlayerCoords();
 		float y = pos.y;
 		if (isUpJumping == true) {
-			if (y >= 0.35f) {
+			if (y >= 0.8f) {
 				y -= 1.5 * delta;
 			}
 			else {
@@ -718,7 +718,7 @@ void Tema3::LoadPlayer(float delta) {
 			}
 		}
 		else {
-			if (y <= 1) {
+			if (y <= 1.5f) {
 				y += 1.5 * delta;
 			}
 			else {
@@ -754,7 +754,7 @@ void Tema3::LoadPlayer(float delta) {
 		float y = pos.y;
 		float x = pos.x;
 		if (isUpLeft == true) {
-			if (y >= 0.35f) {
+			if (y >= 0.8f) {
 				y -= 1.5 * delta;
 			}
 			else {
@@ -763,14 +763,14 @@ void Tema3::LoadPlayer(float delta) {
 			}
 		}
 		else {
-			if (y <= 1) {
+			if (y <= 1.5) {
 				y += 1.5 * delta;
 			}
 			else {
 				isUpLeft = true;
 			}
 		}
-		x -= 2.15f * delta;
+		x -= 2.45f * delta;
 		modelMatrix *= Transform3D::Translate(x, y, pos.z);
 		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
 		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
@@ -799,7 +799,7 @@ void Tema3::LoadPlayer(float delta) {
 		float y = pos.y;
 		float x = pos.x;
 		if (isUpRight == true) {
-			if (y >= 0.35f) {
+			if (y >= 0.80) {
 				y -= 1.5 * delta;
 			}
 			else {
@@ -808,14 +808,14 @@ void Tema3::LoadPlayer(float delta) {
 			}
 		}
 		else {
-			if (y <= 1) {
+			if (y <= 1.5f) {
 				y += 1.5 * delta;
 			}
 			else {
 				isUpRight = true;
 			}
 		}
-		x += 2.15f * delta;
+		x += 2.45f * delta;
 		modelMatrix *= Transform3D::Translate(x, y, pos.z);
 		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
 		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
@@ -846,7 +846,7 @@ void Tema3::LoadStartPlatform()
 	modelMatrix *= Transform3D::Scale(7, 0.25f, 7.0f);
 	glm::vec3 position = modelMatrix * glm::vec4(0, 0, 0, 1);
 	startPlatformZ = position.z;
-	RenderSimpleMesh(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+	RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
 }
 
 // verifica coliziunea jucatorului cu platforma cu indicele index
@@ -861,61 +861,77 @@ bool Tema3::checkCollision(int index) {
 	float zCoord;
 	float xCoord;
 	float yCoord;
-	xCoord = 0;
-	if (index % 3 == 2) {
-		xCoord = platforms->getPlatformXCoord(index) - 0.15f;
-	}
-	if (index % 3 == 0) {
-		xCoord = platforms->getPlatformXCoord(index) + 0.15f;
-	}
+	xCoord = platforms->getPlatformXCoord(index);
 	yCoord = platforms->getPlatformYCoord(index);
+	if (index % 3 == 0) { //left platform
+		xCoord += 0.15f;
+	}
+	if (index % 3 == 1) { //right platform
+		yCoord -= 0.15f;
+	}
+
 	for (i = step; i < max_step; i += 0.02f) {
 		float zCoord = i;
-		
 		//verifica daca punctul cubului cel mai apropiat de sfera este plasat in interiorul sferei
 		float distance = sqrt(pow((xCoord - playerCoord.x), 2) + pow((yCoord - playerCoord.y), 2) + pow((zCoord - playerCoord.z), 2));
 
-		if (distance < 0.5f) { //coliziune
+		if (distance <= 1) { //coliziune
 			ok = true;
 		}
 	}
 	return ok;
 }
 
-void Tema3::LoadDecorElements(float deltaTimeSeconds) {
-	//recalculeaza valorile pentru translatii
-	int i;
-	for (i = 0; i < 4; i++) {
-		translateRightDecorValues[i] += 4.5f * deltaTimeSeconds;
-
-		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(3.5f, 0, -2 + translateRightDecorValues[i]);
-		modelMatrix *= Transform3D::Scale(0.5, 1, 0.5);
-
-		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
-			RenderSimpleMesh(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
-		}
-		else {
-			translateRightDecorValues[i] = -10;
-		}
+void Tema3::renderFuelInformation(float deltaTimeSeconds) {
+	diffFactor += 0.03;
+	if (fallingPlayer == false && start == true) {
+		fuelValue -= (3.5f + diffFactor) * deltaTimeSeconds;
+	}
+	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
+	glm::mat4 modelMatrix = glm::mat4(1);
+	
+	if (!thirdPersonCam)
+	{ //redare pentru modul firstPerson
+		modelMatrix *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue, 0.25f, 1.25f);
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+	}
+	else //redare pentru modul thirdPerson
+	{ 
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue , 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
 	}
 }
 
 void Tema3::Update(float deltaTimeSeconds)
 {	
 	LoadStars();
-	
+	clock_t endMom = clock() - startMom;
 	if (fallingPlayer == true) {
 		glClearColor(1.000, 0.855, 0.725, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-
+	if (endMom >= 5000) {//5sec
+		orangeAbility = false;
+		prizeFactor = 0;
+	}
 	if (start == true && fallingPlayer == false) {
-		LoadDecorElements(deltaTimeSeconds);
 		int i;
 		for (i = 0; i < 9; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds, i);
+			if (orangeAbility == true) {
+				prizeFactor = 4;
+			}
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds + prizeFactor * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
 			translateZ += 4.5f * deltaTimeSeconds;
@@ -941,7 +957,23 @@ void Tema3::Update(float deltaTimeSeconds)
 		}
 	}
 
+	if (fuelValue <= 0) { //verifica numarul de vieiti la terminarea combustibilului
+		
+		if (lives == 0) {
+			gameOver = true;
+			Engine::GetWindow()->Close();
+			cout << "Combustibil epuizat :(" << endl;
+		}
+		else {
+			fuelValue = initialFuelValue; //reinitializeaza combustibilul
+			lives--;
+		}
+		
+	}
 
+	renderFuelInformation(deltaTimeSeconds);
+	//daca jucatorul nu are coliziune cu nicio platforma iar jocul nu este in nicio situatie speciala
+	//(inainte de start joc, saritura la apasarea space, deplasare stanga-dreapta), atunci este 'activata' animatia de cadere a mingii
 	if (checkPlayerPos == true) {
 		collideCheck = false; //nicio coliziune
 		if (jumping == false && moveLeft == false && moveRight == false) {
