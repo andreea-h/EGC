@@ -30,8 +30,10 @@ private:
 	void LoadShaders();
 	Mesh* CreateStylisedCube();
 	Mesh* CreateCylinder();
+	Mesh* CreateDiamond();
 	void LoadDecorElements(float deltaTimeSeconds);
 	void LoadLamps(float deltaTimeSeconds);
+	void LoadCollectionItem(float time);
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -61,6 +63,7 @@ private:
 	unsigned int materialShininess;
 	float materialKd;
 	float materialKs;
+	float cutOff;
 
 
 	Platform* platforms; //obiectul care reprezinta platformele pe care merge jucatorul
@@ -123,4 +126,9 @@ private:
 	//memoreaza pozitiile 
 	std::vector<float> RightLampsPos = std::vector<float>(7);
 	std::vector<float> LeftLampsPos = std::vector<float>(7);
+
+	std::vector<glm::vec3> spotLightPosition = std::vector<glm::vec3>(7);
+	std::vector<glm::vec3> spotLightDirection = std::vector<glm::vec3>(7);
+
+
 };

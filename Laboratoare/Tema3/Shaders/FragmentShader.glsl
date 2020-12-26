@@ -5,16 +5,29 @@ uniform sampler2D texture_2;
 uniform int usesTexture2;
 
 in vec2 texcoord;
+in float light;
 
 layout(location = 0) out vec4 out_color;
 uniform float time;
 
+uniform vec3 light_position;
+uniform vec3 eye_position;
+
+uniform vec3 spotLightDirection;
+uniform vec3 spotLightPosition;
+
+uniform float kd;
+uniform float ks;
+uniform int shininess;
+
+uniform float cut_off;
+
+uniform vec3 object_color;
+
+
 void main()
 {
-	// TODO : calculate the out_color using the texture2D() function
 	out_color = texture2D(texture_1, texcoord);
-	if (out_color.a < 0.5) 
-		discard;
-	
+	//out_color *= light;
 }
 

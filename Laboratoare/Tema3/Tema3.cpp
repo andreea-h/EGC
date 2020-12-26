@@ -12,12 +12,14 @@ using namespace std;
 
 Tema3::Tema3()
 {
+	window->SetSize(1500, 900);
+
 	Mesh* star = CreateStar();
 
 	FoV = 45.0f;
 	//defineste pozitia initiala a camerei
 	thirdPersonCamPosition = glm::mat4(1);
-	thirdPersonCamPosition = Transform3D::Translate(0, 1.75f, 3.5f);
+	thirdPersonCamPosition = Transform3D::Translate(0, 4.65f, 6.55f);
 	thirdPersonCam = true;
 
 	//defineste pozitia camerei firstPerson
@@ -32,6 +34,7 @@ Tema3::Tema3()
 	camera = new Tema_3::Camera();
 	camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 	
+
 	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
 	
 	platforms = new Platform();
@@ -42,12 +45,19 @@ Tema3::Tema3()
 
 	int i;
 	for (i = 0; i < 6; i++) {
-		translateRightDecorValues[i] = -i * 3.5f - (3 + i);
-		translateLeftDecorValues[i] = -i * 4.5f - (2.6f + i);
+		translateRightDecorValues[i] = -i * 7.5f;
+		translateLeftDecorValues[i] = -i * 8.5f;
 
-		translateRightLampsValues[i] = -i * 6.5f - i;
-		translateLeftLampsValues[i] = -i * 9.5f - i;
+		translateRightLampsValues[i] = -i * 19.5f - i;
+		translateLeftLampsValues[i] = -i * 22.5f - i;
 	}
+
+	lightPosition = glm::vec3(4.f, 2.5f, 3.f);
+	materialShininess = 50;
+	materialKd = 0.5;
+	materialKs = 0.5;
+
+	cutOff = (float)M_PI / 6.f;
 }
 
 Tema3::~Tema3()
@@ -95,6 +105,30 @@ Mesh* Tema3::DefineBlackSquare() {
 	return square;
 }
 
+Mesh* Tema3::CreateDiamond() {
+	Mesh* diamond = new Mesh("diamant");
+	std::vector<VertexFormat> vertices =
+	{
+		VertexFormat(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0)),
+		VertexFormat(glm::vec3(0, 0.25f, 0), glm::vec3(1, 1, 0)),
+		VertexFormat(glm::vec3(0, 0, -0.25f), glm::vec3(1, 1, 1)),
+		VertexFormat(glm::vec3(0.25f, -0.25, 0), glm::vec3(1, 1, 0)),
+		VertexFormat(glm::vec3(-0.25f, -0.25, 0), glm::vec3(1, 1, 0))
+	};
+	std::vector<unsigned short> indices =
+	{
+		0, 1, 4,
+		0, 4, 3,
+		0, 3, 1,
+		2, 1, 3,
+		2, 4, 1,
+		2, 3, 4,
+	};
+	diamond->InitFromData(vertices, indices);
+	meshes["diamant"] = diamond;
+	return diamond;
+}
+
 void Tema3::LoadMeshes() {
 	{
 		Mesh* mesh = new Mesh("box");
@@ -114,6 +148,10 @@ void Tema3::LoadMeshes() {
 
 	{
 		Mesh* mesh = DefineBlackSquare(); //patrat folosit ulterior pentru fuel bar
+	}
+
+	{
+		Mesh* diamond = CreateDiamond();
 	}
 
 	{
@@ -497,25 +535,62 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 //render with textures
 void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
 {
+
 	if (!mesh || !shader || !shader->GetProgramID())
 		return;
 
 	// render an object using the specified shader and the specified position
 	glUseProgram(shader->program);
 
+	int timeLoc = glGetUniformLocation(shader->program, "time");
+	glUniform1f(timeLoc, Engine::GetElapsedTime());
+
+	srand(time(NULL));
+	int randVal = glGetUniformLocation(shader->program, "rand");
+	glUniform1f(randVal, rand() % 100 + 10);
+
+	GLint lightPosLoc = glGetUniformLocation(shader->program, "light_position");
+	glUniform3f(lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
+
+	glm::vec3 eyePosition = camera->position;
+	int eyePosLoc = glGetUniformLocation(shader->program, "eye_position");
+	glUniform3f(eyePosLoc, eyePosition.x, eyePosition.y, eyePosition.z);
+
+	GLint varLoc = glGetUniformLocation(shader->program, "kd");
+	glUniform1f(varLoc, materialKd);
+
+	varLoc = glGetUniformLocation(shader->program, "ks");
+	glUniform1f(varLoc, materialKs);
+
+	varLoc = glGetUniformLocation(shader->program, "shininess");
+	glUniform1i(varLoc, materialShininess);
+
+	int object_color = glGetUniformLocation(shader->program, "object_color");
+	glUniform3f(object_color, 0, 1, 0);
+	int i;
+	//for (i = 0; i < 6; i++) {
+		int headlight_position = glGetUniformLocation(shader->program, "spotLightPosition");
+		glUniform3f(headlight_position, spotLightPosition[0].x, spotLightPosition[0].y, spotLightPosition[0].z);
+
+		int headlight_direction = glGetUniformLocation(shader->program, "spotLightDirection");
+		glUniform3f(headlight_direction, spotLightDirection[0].x, spotLightDirection[0].y, spotLightDirection[0].z);
+	//}
+
+	int cut_off = glGetUniformLocation(shader->program, "cut_off");
+	glUniform1f(cut_off, cutOff);
+
 	// Bind model matrix
-	GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
-	glUniformMatrix4fv(loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "Model");
+	glUniformMatrix4fv(loc_modelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	// Bind view matrix
-	glm::mat4 viewMatrix = GetSceneCamera()->GetViewMatrix();
-	int loc_view_matrix = glGetUniformLocation(shader->program, "View");
-	glUniformMatrix4fv(loc_view_matrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glm::mat4 viewMatrix = camera->GetViewMatrix();
+	int loc_viewMatrix = glGetUniformLocation(shader->program, "View");
+	glUniformMatrix4fv(loc_viewMatrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 	// Bind projection matrix
-	glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
-	int loc_projection_matrix = glGetUniformLocation(shader->program, "Projection");
-	glUniformMatrix4fv(loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	int loc_projectionMatrix = glGetUniformLocation(shader->program, "Projection");
+	glUniformMatrix4fv(loc_projectionMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
@@ -553,13 +628,13 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 
 	// TODO: Set material property uniforms (shininess, kd, ks, object color) 
 	//componeneta difuza=intensitatea de material difuza
-	GLint varLoc = glGetUniformLocation(shader->program, "material_kd");
+	GLint varLoc = glGetUniformLocation(shader->program, "kd");
 	glUniform1f(varLoc, materialKd);
 	//componenta speculara=intensitatea de material speculara
-	varLoc = glGetUniformLocation(shader->program, "material_ks");
+	varLoc = glGetUniformLocation(shader->program, "ks");
 	glUniform1f(varLoc, materialKs);
 
-	varLoc = glGetUniformLocation(shader->program, "material_shininess");
+	varLoc = glGetUniformLocation(shader->program, "shininess");
 	glUniform1i(varLoc, materialShininess);
 
 	varLoc = glGetUniformLocation(shader->program, "object_color");
@@ -586,7 +661,7 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema3::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(0.529, 0.808, 0.980, 1);
+	//glClearColor(0.529, 0.808, 0.980, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -630,6 +705,17 @@ void Tema3::setTranslatePoints()
 	for (i = 9; i < 12; i++) {
 		platforms->setTranslatePoint(i, -5.5f - maxCoord - 3 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2);
 	}
+
+	float maxCoord3 = -999;
+	for (i = 9; i < 12; i++)
+	{
+		if (platforms->getPlatformSize(i) > maxCoord3) {
+			maxCoord3 = platforms->getPlatformSize(i);
+		}
+	}
+	for (i = 12; i < 15; i++) {
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 4 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2 - maxCoord3);
+	}
 }
 
 void Tema3::LoadStars() {
@@ -667,7 +753,7 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 
 		//platformele care dispar in spatele camerei nu mai sunt redate
-		if (platforms->getPlatformPos(i) <= 2.5f) {
+		if (platforms->getPlatformPos(i) <= 4.5f) {
 			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
 		}
 		else {
@@ -715,7 +801,6 @@ void Tema3::LoadPlatforms() {
 		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
 	}
 
-
 	for (i = 9; i < 12; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		if (i != 10) {
@@ -733,7 +818,25 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
 	}
-	
+	for (i = 12; i < 15; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		if (i != 13) {
+			modelMatrix *= Transform3D::Translate(2.85f * (i - 13), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.85f, 0.25f, platforms->getPlatformSize(i));
+		}
+		else {
+			modelMatrix *= Transform3D::Translate(2.5f * (i - 13), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(1.40f, 0.25f, platforms->getPlatformSize(i));
+		}
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
+		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+	}
+
+
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
 	if (ok1 == true) {
 		//calculeaza lungimea celei mai lungi platforme din cele care se sterg
@@ -786,6 +889,7 @@ void Tema3::renderFuelInformation(float deltaTimeSeconds) {
 
 // reda jucatorul in scena
 void Tema3::LoadPlayer(float delta) {
+
 	if (fallingPlayer == true) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		glm::vec3 pos = player.getActualPlayerCoords();
@@ -1025,7 +1129,7 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 	int i;
 	for (i = 0; i <6; i++) {
 		if (fallingPlayer == false && start == true) {
-			translateRightDecorValues[i] += 4.5f * deltaTimeSeconds;
+			translateRightDecorValues[i] += 7.5f * deltaTimeSeconds;
 		}
 
 		glm::mat4 modelMatrix = glm::mat4(1);
@@ -1033,7 +1137,7 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
 
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
+		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
 			modelMatrix = glm::mat4(1);
 			modelMatrix *= Transform3D::Translate(3.75f, 1.5f, -5.25f + translateRightDecorValues[i]);
@@ -1041,13 +1145,13 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 		}
 		else {
-			translateRightDecorValues[i] = -25.5f;
+			translateRightDecorValues[i] = -45;
 		}
 	}
 
 	for (i = 0; i < 6; i++) {
 		if (fallingPlayer == false && start == true) {
-			translateLeftDecorValues[i] += 4.5f * deltaTimeSeconds;
+			translateLeftDecorValues[i] += 7.5f * deltaTimeSeconds;
 		}
 
 		glm::mat4 modelMatrix = glm::mat4(1);
@@ -1055,7 +1159,7 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
 
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
+		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
 			modelMatrix = glm::mat4(1);
 			modelMatrix *= Transform3D::Translate(-4.65f, 1.5f, -5.25f + translateLeftDecorValues[i]);
@@ -1063,9 +1167,17 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 		}
 		else {
-			translateLeftDecorValues[i] = -25.1f;
+			translateLeftDecorValues[i] = -51;
 		}
 	}
+}
+
+void Tema3::LoadCollectionItem(float time) {
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-2.65f, 1.5f, -5.25f);
+	modelMatrix *= Transform3D::Scale(1, 0.75, 0.5);
+	modelMatrix *= Transform3D::RotateOZ(-1);
+	RenderSimpleMesh(meshes["diamant"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 }
 
 void Tema3::LoadLamps(float time) {
@@ -1073,18 +1185,22 @@ void Tema3::LoadLamps(float time) {
 	int i;
 	for (i = 0; i < 6; i++) {
 		if (fallingPlayer == false && start == true) {
-			translateRightLampsValues[i] += 4.5f * time;
+			translateRightLampsValues[i] += 7.5f * time;
 		}
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(3.65f, 1.85f, -0.5f + translateRightLampsValues[i]);
 		modelMatrix *= Transform3D::Scale(0.9, 0.5f, 0.9);
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
+		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["tetraedru"], shaders["textureShader"], modelMatrix, mapTextures["tabla"]);
 		}
 		else {
-			translateRightLampsValues[i] = -25.1f;
+			translateRightLampsValues[i] = -110;
 		}
+
+		spotLightPosition[i] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		spotLightDirection[i] = glm::vec4(0.f, 0.f, 0.f, 1.f);
+
 
 		modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(3.95f, 0, -0.15f + translateRightLampsValues[i]);
@@ -1097,13 +1213,13 @@ void Tema3::LoadLamps(float time) {
 	//left lamps
 	for (i = 0; i < 6; i++) {
 		if (fallingPlayer == false && start == true) {
-			translateLeftLampsValues[i] += 4.5f * time;
+			translateLeftLampsValues[i] += 7.5f * time;
 		}
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(-4.65f, 1.85f, -0.5f + translateLeftLampsValues[i]);
 		modelMatrix *= Transform3D::Scale(0.9, 0.5f, 0.9);
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
+		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["tetraedru"], shaders["textureShader"], modelMatrix, mapTextures["tabla"]);
 		}
 
@@ -1111,18 +1227,19 @@ void Tema3::LoadLamps(float time) {
 		modelMatrix *= Transform3D::Translate(-4.05f, 0, -0.15f + translateLeftLampsValues[i]);
 		modelMatrix *= Transform3D::Scale(0.10, 1.85f, 0.10);
 		position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
+		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["metal"]);
 		}
 		else {
-			translateLeftLampsValues[i] = -25.1f;
+			translateLeftLampsValues[i] = -120.5;
 		}
 	}
 }
 
 void Tema3::Update(float deltaTimeSeconds)
 {
-	LoadStars();
+	LoadCollectionItem(deltaTimeSeconds);
+	//LoadStars();
 	LoadDecorElements(deltaTimeSeconds);
 	LoadLamps(deltaTimeSeconds);
 	glm::mat4 modelMatrix = glm::mat4(1);
@@ -1130,19 +1247,20 @@ void Tema3::Update(float deltaTimeSeconds)
 	RenderMeshTex(meshes["cilindru"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 
 	if (fallingPlayer == true) {
-		glClearColor(1.000, 0.855, 0.725, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClearColor(1.000, 0.855, 0.725, 1);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LoadDecorElements(deltaTimeSeconds);
 		LoadLamps(deltaTimeSeconds);
+		LoadCollectionItem(deltaTimeSeconds);
 	}
 	
 	if (start == true && fallingPlayer == false) {
 		int i;
-		for (i = 0; i < 12; i++) {
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds, i);
+		for (i = 0; i < 15; i++) {
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 7.5f * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
-			translateZ += 4.5f * deltaTimeSeconds;
+			translateZ += 7.5f * deltaTimeSeconds;
 		}
 	}
 
@@ -1178,7 +1296,7 @@ void Tema3::Update(float deltaTimeSeconds)
 		
 	}
 
-	renderFuelInformation(deltaTimeSeconds);
+	//renderFuelInformation(deltaTimeSeconds);
 	//daca jucatorul nu are coliziune cu nicio platforma iar jocul nu este in nicio situatie speciala
 	//(inainte de start joc, saritura la apasarea space, deplasare stanga-dreapta), atunci este 'activata' animatia de cadere a mingii
 	if (checkPlayerPos == true) {
