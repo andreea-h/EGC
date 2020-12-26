@@ -31,7 +31,7 @@ private:
 	Mesh* CreateStylisedCube();
 	Mesh* CreateCylinder();
 	void LoadDecorElements(float deltaTimeSeconds);
-
+	void LoadLamps(float deltaTimeSeconds);
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -109,10 +109,18 @@ private:
 
 	float translateDecor;
 	//memoreaza tranzitiile pentru trunchiurile de copaci de pe stanga si de pe dreapta
-	std::vector<float> translateRightDecorValues = std::vector<float>(10);
-	std::vector<float> translateLeftDecorValues = std::vector<float>(10);
+	std::vector<float> translateRightDecorValues = std::vector<float>(7);
+	std::vector<float> translateLeftDecorValues = std::vector<float>(7);
 
 	//memoreaza pozitiile 
-	std::vector<float> RightDecorPos = std::vector<float>(10);
-	std::vector<float> LeftDecorPos = std::vector<float>(10);
+	std::vector<float> RightDecorPos = std::vector<float>(7);
+	std::vector<float> LeftDecorPos = std::vector<float>(7);
+
+	//memoreaza tranzitiile pentru lampile de pe stanga si de pe dreapta
+	std::vector<float> translateRightLampsValues = std::vector<float>(7);
+	std::vector<float> translateLeftLampsValues = std::vector<float>(7);
+
+	//memoreaza pozitiile 
+	std::vector<float> RightLampsPos = std::vector<float>(7);
+	std::vector<float> LeftLampsPos = std::vector<float>(7);
 };

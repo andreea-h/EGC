@@ -301,7 +301,19 @@ void Tema2::setTranslatePoints()
 		}
 	}
 	for (i = 6; i < 9; i++) {
-		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+	}
+
+	float maxCoord2 = -999;
+	for (i = 6; i < 9; i++)
+	{
+		if (platforms->getPlatformSize(i) > maxCoord2) {
+			maxCoord2 = platforms->getPlatformSize(i);
+		}
+	}
+
+	for (i = 9; i < 12; i++) {
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 3 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2);
 	}
 }
 
@@ -367,7 +379,18 @@ void Tema2::LoadPlatforms() {
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
 	}
-	
+	for (i = 9; i < 12; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(2.5f * (i - 10), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
+	}
+
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
 	if (ok1 == true) {
 		//calculeaza lungimea celei mai lungi platforme din cele care se sterg
@@ -666,7 +689,7 @@ void Tema2::Update(float deltaTimeSeconds)
 	}
 	if (start == true && fallingPlayer == false) {
 		int i;
-		for (i = 0; i < 9; i++) {
+		for (i = 0; i < 12; i++) {
 			if (orangeAbility == true) {
 				prizeFactor = 4;
 			}

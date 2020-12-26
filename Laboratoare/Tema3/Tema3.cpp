@@ -13,6 +13,7 @@ using namespace std;
 Tema3::Tema3()
 {
 	Mesh* star = CreateStar();
+
 	FoV = 45.0f;
 	//defineste pozitia initiala a camerei
 	thirdPersonCamPosition = glm::mat4(1);
@@ -30,9 +31,9 @@ Tema3::Tema3()
 	renderCameraTarget = false;
 	camera = new Tema_3::Camera();
 	camera->Set(thirdPersonCamPosition * glm::vec4(0.f, 0.f, 0.f, 1.f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
-
+	
 	projectionMatrix = glm::perspective(RADIANS(FoV), window->props.aspectRatio, 0.01f, 200.0f);
-
+	
 	platforms = new Platform();
 
 	//defineste coordonatele la care urmeaza sa fie redate cuburile
@@ -40,9 +41,12 @@ Tema3::Tema3()
 	setTranslatePoints();
 
 	int i;
-	for (i = 0; i < 10; i++) {
-		translateRightDecorValues[i] = -i * 4.5f - (3 + i);
-		translateLeftDecorValues[i] = -i * 2.5f - (2.6f + i);
+	for (i = 0; i < 6; i++) {
+		translateRightDecorValues[i] = -i * 3.5f - (3 + i);
+		translateLeftDecorValues[i] = -i * 4.5f - (2.6f + i);
+
+		translateRightLampsValues[i] = -i * 6.5f - i;
+		translateLeftLampsValues[i] = -i * 9.5f - i;
 	}
 }
 
@@ -113,31 +117,48 @@ void Tema3::LoadMeshes() {
 	}
 
 	{
-		vector<VertexFormat> vertices_tetraedru
+		std::vector<glm::vec3> positions = 
 		{
-			VertexFormat(glm::vec3(0, 0, 0), glm::vec3(0.125, 0.698, 0.667)),
-			VertexFormat(glm::vec3(0.5f, 0, 0.86f), glm::vec3(0.275, 0.510, 0.706)),
-			VertexFormat(glm::vec3(1, 0, 0), glm::vec3(0.498, 1.000, 0.831)),
-			VertexFormat(glm::vec3(0.5f, 1, 0.28f), glm::vec3(0.000, 0.000, 1.000))
+			glm::vec3(0, 0, 0),
+			glm::vec3(0.5f, 0, 0.86f),
+			glm::vec3(1, 0, 0),
+			glm::vec3(0.5f, 1, 0.28f)
 		};
 
-		vector<unsigned short> indices_tetraedru
+		std::vector<glm::vec3> normals =
+		{
+			glm::vec3(0, 0, 0),
+			glm::vec3(0, 1, 0),
+			glm::vec3(1, 0, 0),
+			glm::vec3(1, 1, 0)
+		};
+
+		std::vector<glm::vec2> texCoords =
+		{
+			glm::vec2(0, 0),
+			glm::vec2(0, 1),
+			glm::vec2(1, 0),
+			glm::vec2(1, 1)
+		};
+
+		vector<unsigned short> indices = 
 		{
 			0, 1, 3,
 			1, 2, 3,
 			0, 2, 1,
 			0, 3, 2
 		};
+
 		Mesh* tetraedru = new Mesh("tetraedru");
-		tetraedru->InitFromData(vertices_tetraedru, indices_tetraedru);
+		tetraedru->InitFromData(positions, normals, texCoords, indices);
 		meshes[tetraedru->GetMeshID()] = tetraedru;
 	}
 
 	Mesh* cube = CreateStylisedCube();
 	meshes[cube->GetMeshID()] = cube;
 
-	Mesh* cilindru = CreateCylinder();
-	meshes[cilindru->GetMeshID()] = cilindru;
+	//Mesh* cilindru = CreateCylinder();
+	//meshes[cilindru->GetMeshID()] = cilindru;
 }
 
 Mesh* Tema3::CreateStylisedCube() {
@@ -353,11 +374,27 @@ void Tema3::LoadTextures() {
 	}
 
 	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/pietre3.jpg";
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/lemn.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["piatra2"] = texture;
 	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/rugina.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["tabla"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/metalic.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["metal"] = texture;
+	}
+
+	
 }
 
 void Tema3::Init()
@@ -549,7 +586,7 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema3::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(0.400, 0.804, 0.667, 1);
+	glClearColor(0.529, 0.808, 0.980, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -580,7 +617,18 @@ void Tema3::setTranslatePoints()
 		}
 	}
 	for (i = 6; i < 9; i++) {
-		platforms->setTranslatePoint(i, -5.5f - maxCoord - 1 * 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 2 - platforms->getPlatformSize(i) / 2 - maxCoord1);
+	}
+
+	float maxCoord2 = -999;
+	for (i = 6; i < 9; i++)
+	{
+		if (platforms->getPlatformSize(i) > maxCoord2) {
+			maxCoord2 = platforms->getPlatformSize(i);
+		}
+	}
+	for (i = 9; i < 12; i++) {
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 3 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2);
 	}
 }
 
@@ -612,6 +660,7 @@ void Tema3::LoadPlatforms() {
 		}
 		
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+
 		float zCoord = position.z;
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
@@ -665,6 +714,25 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
 		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
 	}
+
+
+	for (i = 9; i < 12; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		if (i != 10) {
+			modelMatrix *= Transform3D::Translate(2.85f * (i - 10), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(2.85f, 0.25f, platforms->getPlatformSize(i));
+		}
+		else {
+			modelMatrix *= Transform3D::Translate(2.5f * (i - 10), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+			modelMatrix *= Transform3D::Scale(1.40f, 0.25f, platforms->getPlatformSize(i));
+		}
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
+		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+	}
 	
 	//sterge platformele care nu mai sunt vizibile si genereaza altele in locul lor
 	if (ok1 == true) {
@@ -684,6 +752,38 @@ void Tema3::LoadPlatforms() {
 	}
 }
 
+
+void Tema3::renderFuelInformation(float deltaTimeSeconds) {
+	diffFactor += 0.03;
+	if (fallingPlayer == false && start == true) {
+		fuelValue -= (3.5f + diffFactor) * deltaTimeSeconds;
+	}
+	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
+	glm::mat4 modelMatrix = glm::mat4(1);
+
+	if (!thirdPersonCam)
+	{ //redare pentru modul firstPerson
+		modelMatrix *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue, 0.25f, 1.25f);
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+	}
+	else //redare pentru modul thirdPerson
+	{
+		glm::mat4 modelMatrix1 = glm::mat4(1);
+		modelMatrix1 *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
+		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue, 0.25f, 1.25f);
+		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
+		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+	}
+}
+
 // reda jucatorul in scena
 void Tema3::LoadPlayer(float delta) {
 	if (fallingPlayer == true) {
@@ -695,7 +795,7 @@ void Tema3::LoadPlayer(float delta) {
 		//salveaza coordonatele actuale ale jucatorului
 		float y = coords.y;
 		y -= 2 * delta;
-		
+
 		player.setActualCoords(glm::vec4(coords.x, y, coords.z, 1));
 
 		if (y < -5) { //jucatorul s-a aflat suficient timp in cadere, jocul se va incheia
@@ -731,7 +831,7 @@ void Tema3::LoadPlayer(float delta) {
 			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 		}
 		else {
-			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.824, 0.412, 0.118)); 
+			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.824, 0.412, 0.118));
 		}
 
 		firstPersonCamPosition = glm::mat4(1);
@@ -768,7 +868,7 @@ void Tema3::LoadPlayer(float delta) {
 				isUpJumping = true;
 			}
 		}
-		
+
 		modelMatrix *= Transform3D::Translate(pos.x, y, pos.z);
 		modelMatrix *= Transform3D::Scale(0.5f, 0.5f, 0.5f);
 		glm::vec4 coords = modelMatrix * glm::vec4(0, 0, 0, 1);
@@ -820,7 +920,7 @@ void Tema3::LoadPlayer(float delta) {
 		//salveaza coordonatele actuale ale jucatorului
 
 		player.setActualCoords(coords);
-	
+
 		RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
 
 		firstPersonCamPosition = glm::mat4(1);
@@ -881,55 +981,6 @@ void Tema3::LoadPlayer(float delta) {
 	}
 }
 
-void Tema3::LoadDecorElements(float deltaTimeSeconds) {
-	//recalculeaza valorile pentru translatii
-	int i;
-	for (i = 0; i < 10; i++) {
-		if (fallingPlayer == false && start == true) {
-			translateRightDecorValues[i] += 4.5f * deltaTimeSeconds;
-		}
-
-		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(3.95f, 0, -5 + translateRightDecorValues[i]);
-		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
-
-		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
-			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
-			modelMatrix = glm::mat4(1);
-			modelMatrix *= Transform3D::Translate(3.75f, 1.5f, -5.25f + translateRightDecorValues[i]);
-			modelMatrix *= Transform3D::Scale(1, 1, 1);
-			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
-		}
-		else {
-			translateRightDecorValues[i] = -10;
-		}
-	}
-
-	for (i = 0; i < 10; i++) {
-		if (fallingPlayer == false && start == true) {
-			translateLeftDecorValues[i] += 4.5f * deltaTimeSeconds;
-		}
-
-		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(-4.45f, 0, -5 + translateLeftDecorValues[i]);
-		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
-
-		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 2.5f) {
-			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
-			modelMatrix = glm::mat4(1);
-			modelMatrix *= Transform3D::Translate(-4.65f, 1.5f, -5.25f + translateLeftDecorValues[i]);
-			modelMatrix *= Transform3D::Scale(1, 1, 1);
-			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
-		}
-		else {
-			translateLeftDecorValues[i] = -10;
-		}
-	}
-}
-
-
 //inainte de a incepe jocul este redata o platforma de start
 void Tema3::LoadStartPlatform() 
 {
@@ -969,41 +1020,111 @@ bool Tema3::checkCollision(int index) {
 	return ok;
 }
 
-void Tema3::renderFuelInformation(float deltaTimeSeconds) {
-	diffFactor += 0.03;
-	if (fallingPlayer == false && start == true) {
-		fuelValue -= (3.5f + diffFactor) * deltaTimeSeconds;
+void Tema3::LoadDecorElements(float deltaTimeSeconds) {
+	//recalculeaza valorile pentru translatii
+	int i;
+	for (i = 0; i <6; i++) {
+		if (fallingPlayer == false && start == true) {
+			translateRightDecorValues[i] += 4.5f * deltaTimeSeconds;
+		}
+
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.95f, 0, -5 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
+
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
+			modelMatrix = glm::mat4(1);
+			modelMatrix *= Transform3D::Translate(3.75f, 1.5f, -5.25f + translateRightDecorValues[i]);
+			modelMatrix *= Transform3D::Scale(1, 1, 1);
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
+		}
+		else {
+			translateRightDecorValues[i] = -25.5f;
+		}
 	}
-	glm::vec3 fuelPos = glm::vec3(-3.f, 2.5f, -1.f);
-	glm::mat4 modelMatrix = glm::mat4(1);
-	
-	if (!thirdPersonCam)
-	{ //redare pentru modul firstPerson
-		modelMatrix *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
-		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue, 0.25f, 1.25f);
-		glm::mat4 modelMatrix1 = glm::mat4(1);
-		modelMatrix1 *= Transform3D::Translate(fuelPos.x + 2.0f, fuelPos.y, fuelPos.z - 6.5f);
-		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
-		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
-		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+
+	for (i = 0; i < 6; i++) {
+		if (fallingPlayer == false && start == true) {
+			translateLeftDecorValues[i] += 4.5f * deltaTimeSeconds;
+		}
+
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-4.45f, 0, -5 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
+
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
+			modelMatrix = glm::mat4(1);
+			modelMatrix *= Transform3D::Translate(-4.65f, 1.5f, -5.25f + translateLeftDecorValues[i]);
+			modelMatrix *= Transform3D::Scale(1, 1, 1);
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
+		}
+		else {
+			translateLeftDecorValues[i] = -25.1f;
+		}
 	}
-	else //redare pentru modul thirdPerson
-	{ 
-		glm::mat4 modelMatrix1 = glm::mat4(1);
-		modelMatrix1 *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
-		modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+}
+
+void Tema3::LoadLamps(float time) {
+	//right lamps
+	int i;
+	for (i = 0; i < 6; i++) {
+		if (fallingPlayer == false && start == true) {
+			translateRightLampsValues[i] += 4.5f * time;
+		}
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.65f, 1.85f, -0.5f + translateRightLampsValues[i]);
+		modelMatrix *= Transform3D::Scale(0.9, 0.5f, 0.9);
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["tetraedru"], shaders["textureShader"], modelMatrix, mapTextures["tabla"]);
+		}
+		else {
+			translateRightLampsValues[i] = -25.1f;
+		}
+
 		modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(fuelPos.x, fuelPos.y, fuelPos.z);
-		modelMatrix *= Transform3D::Scale(1.25f * fuelValue / initialFuelValue , 0.25f, 1.25f);
-		RenderMesh(meshes["square"], shaders["VertexColor"], modelMatrix);
-		RenderMesh(meshes["black_square"], shaders["VertexColor"], modelMatrix1);
+		modelMatrix *= Transform3D::Translate(3.95f, 0, -0.15f + translateRightLampsValues[i]);
+		modelMatrix *= Transform3D::Scale(0.10, 1.85f, 0.10);
+		position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["metal"]);
+		}
+	}
+	//left lamps
+	for (i = 0; i < 6; i++) {
+		if (fallingPlayer == false && start == true) {
+			translateLeftLampsValues[i] += 4.5f * time;
+		}
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-4.65f, 1.85f, -0.5f + translateLeftLampsValues[i]);
+		modelMatrix *= Transform3D::Scale(0.9, 0.5f, 0.9);
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["tetraedru"], shaders["textureShader"], modelMatrix, mapTextures["tabla"]);
+		}
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-4.05f, 0, -0.15f + translateLeftLampsValues[i]);
+		modelMatrix *= Transform3D::Scale(0.10, 1.85f, 0.10);
+		position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		if (position.z < 2.5f) {
+			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["metal"]);
+		}
+		else {
+			translateLeftLampsValues[i] = -25.1f;
+		}
 	}
 }
 
 void Tema3::Update(float deltaTimeSeconds)
-{	
+{
 	LoadStars();
 	LoadDecorElements(deltaTimeSeconds);
+	LoadLamps(deltaTimeSeconds);
 	glm::mat4 modelMatrix = glm::mat4(1);
 	modelMatrix *= Transform3D::Translate(-2, 2, -4);
 	RenderMeshTex(meshes["cilindru"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
@@ -1012,11 +1133,12 @@ void Tema3::Update(float deltaTimeSeconds)
 		glClearColor(1.000, 0.855, 0.725, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LoadDecorElements(deltaTimeSeconds);
+		LoadLamps(deltaTimeSeconds);
 	}
 	
 	if (start == true && fallingPlayer == false) {
 		int i;
-		for (i = 0; i < 9; i++) {
+		for (i = 0; i < 12; i++) {
 			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
@@ -1036,7 +1158,7 @@ void Tema3::Update(float deltaTimeSeconds)
 
 	int i;
 	bool checkPlayerPos = true;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 12; i++) {
 		if (checkCollision(i) == true) {
 			checkPlayerPos = false;
 			collideCheck = true;
