@@ -29,5 +29,8 @@ void main()
 {
 	out_color = texture2D(texture_1, texcoord);
 	//out_color *= light;
+	if (out_color.a < 0.5) {
+		discard;
+	}
 }
 

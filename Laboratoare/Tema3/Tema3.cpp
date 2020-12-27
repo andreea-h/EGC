@@ -46,10 +46,11 @@ Tema3::Tema3()
 	int i;
 	for (i = 0; i < 6; i++) {
 		translateRightDecorValues[i] = -i * 7.5f;
-		translateLeftDecorValues[i] = -i * 8.5f;
+		translateLeftDecorValues[i] = -i * 7.5f;
 
 		translateRightLampsValues[i] = -i * 19.5f - i;
 		translateLeftLampsValues[i] = -i * 22.5f - i;
+
 	}
 
 	lightPosition = glm::vec3(4.f, 2.5f, 3.f);
@@ -195,8 +196,122 @@ void Tema3::LoadMeshes() {
 	Mesh* cube = CreateStylisedCube();
 	meshes[cube->GetMeshID()] = cube;
 
-	//Mesh* cilindru = CreateCylinder();
-	//meshes[cilindru->GetMeshID()] = cilindru;
+	Mesh* piramida = CreatePyramid();
+
+	{
+		{
+			vector<glm::vec3> vertices
+			{
+				glm::vec3(0.5f,   0.5f, 0.0f),	// Top Right
+				glm::vec3(0.5f,  -0.5f, 0.0f),	// Bottom Right
+				glm::vec3(-0.5f, -0.5f, 0.0f),	// Bottom Left
+				glm::vec3(-0.5f,  0.5f, 0.0f),	// Top Left
+			};
+
+			vector<glm::vec3> normals
+			{
+				glm::vec3(0, 1, 1),
+				glm::vec3(1, 0, 1),
+				glm::vec3(1, 0, 0),
+				glm::vec3(0, 1, 0)
+			};
+			vector<glm::vec2> textureCoords
+			{
+				glm::vec2(0.0f, 0.0f),
+				glm::vec2(1.0f, 0.0f),
+				glm::vec2(1.0f, 1.0f),
+				glm::vec2(0.0f, 1.0f)
+			};
+
+			vector<unsigned short> indices =
+			{
+				0, 1, 3,
+				1, 2, 3
+			};
+
+			Mesh* mesh = new Mesh("patrat");
+			mesh->InitFromData(vertices, normals, textureCoords, indices);
+			meshes[mesh->GetMeshID()] = mesh;
+		}
+	}
+
+}
+
+
+Mesh* Tema3::CreatePyramid() {
+	Mesh* piramida = new Mesh("piramida");
+	std::vector<glm::vec3> positions =
+	{
+		glm::vec3(0, 0.5f, 0),
+		glm::vec3(-0.5f, -0.5f, 0.5f),
+		glm::vec3(0.5f, -0.5f, 0.5f),
+
+		glm::vec3(0, 0.5f, 0),
+		glm::vec3(-0.5f, -0.5f, -0.5f),
+		glm::vec3(-0.5f, -0.5f, 0.5f),
+
+		glm::vec3(0, 0.5f, 0),
+		glm::vec3(0.5f, -0.5f, -0.5f),
+		glm::vec3(-0.5f, -0.5f, -0.5f),
+
+		glm::vec3(0, 0.5f, 0),
+		glm::vec3(0.5f, -0.5f, 0.5f),
+		glm::vec3(0.5f, -0.5f, -0.5f)
+	};
+
+	std::vector<glm::vec3> normals =
+	{
+		//triunghiul din fata
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, 1),
+		glm::vec3(0, 0, 1),
+		
+		//trtiunghiul din stanga
+		glm::vec3(-1, 0, 0),
+		glm::vec3(-1, 0, 0),
+		glm::vec3(-1, 0, 0),
+	
+		//triunghiul din spate
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 0, -1),
+		glm::vec3(0, 0, -1),
+
+		//triunghiul din dreapta
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 0, 0),
+		glm::vec3(1, 0, 0)
+	};
+
+	std::vector<glm::vec2> texCoords =
+	{
+		glm::vec2(0.5f, 1),
+		glm::vec2(0, 0),
+		glm::vec2(1, 0),
+
+		glm::vec2(0.5f, 1),
+		glm::vec2(0, 0),
+		glm::vec2(1, 0),
+
+		glm::vec2(0.5f, 1),
+		glm::vec2(0, 0),
+		glm::vec2(1, 0),
+
+		glm::vec2(0.5f, 1),
+		glm::vec2(0, 0),
+		glm::vec2(1, 0)
+	};
+
+	vector<unsigned short> indices =
+	{
+		0, 1, 2,
+		3, 4, 5,
+		6, 7, 8,
+		9, 10, 11
+	};
+	piramida->InitFromData(positions, normals, texCoords, indices);
+
+	meshes[piramida->GetMeshID()] = piramida;
+	return piramida;
 }
 
 Mesh* Tema3::CreateStylisedCube() {
@@ -391,10 +506,24 @@ void Tema3::LoadShaders() {
 void Tema3::LoadTextures() {
 	//load textures
 	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/grass1.jpg";
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/frunze_copac.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["grass"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/iarba.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["iarba"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/pietre3.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["pietre"] = texture;
 	}
 
 	{
@@ -405,7 +534,7 @@ void Tema3::LoadTextures() {
 	}
 
 	{
-		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra1.jpg";
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/pietre3.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["piatra"] = texture;
@@ -415,7 +544,7 @@ void Tema3::LoadTextures() {
 		const string textureLoc = "Source/Laboratoare/Tema3/Textures/lemn.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
-		mapTextures["piatra2"] = texture;
+		mapTextures["lemn"] = texture;
 	}
 
 	{
@@ -432,7 +561,47 @@ void Tema3::LoadTextures() {
 		mapTextures["metal"] = texture;
 	}
 
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/flori1.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["floare1"] = texture;
+	}
 	
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/flori2.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["floare2"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/flori3.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["floare3"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/flori4.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["floare4"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/grass.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["leaves"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/apa.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["apa"] = texture;
+	}
 }
 
 void Tema3::Init()
@@ -661,7 +830,7 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema3::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	//glClearColor(0.529, 0.808, 0.980, 1);
+	glClearColor(0.529, 0.808, 0.980, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -754,7 +923,13 @@ void Tema3::LoadPlatforms() {
 
 		//platformele care dispar in spatele camerei nu mai sunt redate
 		if (platforms->getPlatformPos(i) <= 4.5f) {
-			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+			if (i == 1) {
+				RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+			}
+			else {
+				RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["iarba"]);
+			}
+			
 		}
 		else {
 			count++;
@@ -781,7 +956,12 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+		if (i == 4) {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		}
+		else {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["iarba"]);
+		}
 	}
 	for (i = 6; i < 9; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
@@ -798,7 +978,13 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+		if (i == 7) {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		}
+		else {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["iarba"]);
+		}
+		
 	}
 
 	for (i = 9; i < 12; i++) {
@@ -816,7 +1002,12 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+		if (i == 10) {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		}
+		else {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["iarba"]);
+		}
 	}
 	for (i = 12; i < 15; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
@@ -833,7 +1024,12 @@ void Tema3::LoadPlatforms() {
 		platforms->setPlatformXCoord(position.x, i);
 		platforms->setPlatformYCoord(position.y, i);
 		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
-		RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra2"]);
+		if (i == 13) {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["piatra"]);
+		}
+		else {
+			RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["iarba"]);
+		}
 	}
 
 
@@ -1093,7 +1289,7 @@ void Tema3::LoadStartPlatform()
 	modelMatrix *= Transform3D::Scale(8.5f, 0.25f, 7.0f);
 	glm::vec3 position = modelMatrix * glm::vec4(0, 0, 0, 1);
 	startPlatformZ = position.z;
-	RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
+	RenderMeshTex(meshes["box"], shaders["textureShader"], modelMatrix, mapTextures["lemn"]);
 }
 
 // verifica coliziunea jucatorului cu platforma cu indicele index
@@ -1133,14 +1329,82 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 		}
 
 		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -18 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare4"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -13 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare1"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -4 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare2"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -1 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare3"]);
+
+
+		//frunze pt fiecare floare
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -17.95 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -12.95 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -3.95 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(3.85f, 0.5, -0.95 + translateRightDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+
+		modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(3.95f, 0, -5 + translateRightDecorValues[i]);
-		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
+		modelMatrix *= Transform3D::Scale(0.25, 1.5f, 0.25);
 
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 6.55f) {
+		if (position.z - 9 < 6.55f) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
 			modelMatrix = glm::mat4(1);
-			modelMatrix *= Transform3D::Translate(3.75f, 1.5f, -5.25f + translateRightDecorValues[i]);
+			modelMatrix *= Transform3D::Translate(3.55f, 1.5f, -5.25f + translateRightDecorValues[i]);
 			modelMatrix *= Transform3D::Scale(1, 1, 1);
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 		}
@@ -1155,11 +1419,79 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 		}
 
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(-4.45f, 0, -5 + translateLeftDecorValues[i]);
-		modelMatrix *= Transform3D::Scale(0.5, 1.5f, 0.5);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -19 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare1"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -14 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare2"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -8 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare4"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -1 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["floare3"]);
+
+
+		//frunze pt fiecare floare
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -18.95 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -13.95 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -7.95 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-3.95f, 0.5, -0.95 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.75, 0.75, 0.75);
+		modelMatrix *= Transform3D::RotateOY(1.57);
+		modelMatrix *= Transform3D::RotateOZ(1.57);
+		modelMatrix *= Transform3D::RotateOX(1.57);
+		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
+
+
+		modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(-4.25f, 0, -5 + translateLeftDecorValues[i]);
+		modelMatrix *= Transform3D::Scale(0.25, 1.5f, 0.25);
 
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		if (position.z < 6.55f) {
+		if (position.z - 18 < 6.55f) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["copac"]);
 			modelMatrix = glm::mat4(1);
 			modelMatrix *= Transform3D::Translate(-4.65f, 1.5f, -5.25f + translateLeftDecorValues[i]);
@@ -1237,9 +1569,51 @@ void Tema3::LoadLamps(float time) {
 }
 
 void Tema3::Update(float deltaTimeSeconds)
-{
-	LoadCollectionItem(deltaTimeSeconds);
-	//LoadStars();
+{/*
+	if (start == true) {
+		int i;
+		for (i = 0; i < 3; i++) {
+			translateWaterPlan[i] += 7.5f * deltaTimeSeconds;
+			if (waterPos[i] > 6) {
+				cout << waterPos[i] << endl;
+				if (i == 0) {
+					translateWaterPlan[i] = -30;
+				}
+				if (i == 1) {
+					translateWaterPlan[i] = -150;
+				}
+				if (i == 2) {
+					translateWaterPlan[i] = -180;
+				}
+			}
+		}
+	}
+	
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0, -2, -5 + translateWaterPlan[0]);
+	modelMatrix *= Transform3D::Scale(9, 9000, 20);
+	modelMatrix *= Transform3D::RotateOX(-1.57);
+	glm::vec3 pos = modelMatrix * glm::vec4(0, 0, 0, 1);
+	waterPos[0] = pos.z;
+	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0, -2, -20 + translateWaterPlan[1]);
+	modelMatrix *= Transform3D::Scale(10, 2000, 20);
+	modelMatrix *= Transform3D::RotateOX(-1.57);
+	pos = modelMatrix * glm::vec4(0, 0, 0, 1);
+	waterPos[1] = pos.z;
+	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0, -2, -40 + translateWaterPlan[2]);
+	modelMatrix *= Transform3D::Scale(10, 2000, 20);
+	modelMatrix *= Transform3D::RotateOX(-1.57);
+	pos = modelMatrix * glm::vec4(0, 0, 0, 1);
+	waterPos[2] = pos.z;
+	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
+	*/
+
 	LoadDecorElements(deltaTimeSeconds);
 	LoadLamps(deltaTimeSeconds);
 	glm::mat4 modelMatrix = glm::mat4(1);
@@ -1251,7 +1625,6 @@ void Tema3::Update(float deltaTimeSeconds)
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LoadDecorElements(deltaTimeSeconds);
 		LoadLamps(deltaTimeSeconds);
-		LoadCollectionItem(deltaTimeSeconds);
 	}
 	
 	if (start == true && fallingPlayer == false) {

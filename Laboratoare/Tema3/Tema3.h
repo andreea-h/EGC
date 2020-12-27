@@ -34,6 +34,7 @@ private:
 	void LoadDecorElements(float deltaTimeSeconds);
 	void LoadLamps(float deltaTimeSeconds);
 	void LoadCollectionItem(float time);
+	Mesh* CreatePyramid();
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -127,8 +128,16 @@ private:
 	std::vector<float> RightLampsPos = std::vector<float>(7);
 	std::vector<float> LeftLampsPos = std::vector<float>(7);
 
+	std::vector<float> flowersRightPos1 = std::vector<float>(7);
+	std::vector<float> flowersLeftPos1 = std::vector<float>(7);
+	std::vector<float> flowersRightPos2 = std::vector<float>(7);
+	std::vector<float> flowersLeftPos2 = std::vector<float>(7);
+	std::vector<float> flowersRightPos3 = std::vector<float>(7);
+	std::vector<float> flowersLeftPos3 = std::vector<float>(7);
+
 	std::vector<glm::vec3> spotLightPosition = std::vector<glm::vec3>(7);
 	std::vector<glm::vec3> spotLightDirection = std::vector<glm::vec3>(7);
 
-
+	std::vector<float> translateWaterPlan = std::vector<float>(4);
+	std::vector<float> waterPos = std::vector<float>(4);
 };
