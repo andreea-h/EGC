@@ -24,8 +24,8 @@ Tema3::Tema3()
 
 	//defineste pozitia camerei firstPerson
 	firstPersonCamPosition = glm::mat3(1);
-	glm::vec3 pos = player.getInitialPlayerCoords();
-	firstPersonCamPosition *= Transform3D::Translate(pos.x, pos.y, pos.z - 0.75f);
+	glm::vec3 pos = player.getActualPlayerCoords();
+	firstPersonCamPosition *= Transform3D::Translate(pos.x, pos.y, pos.z - 0.25f);
 	
 	targetPosition = firstPersonCamPosition;
 	targetPosition *= Transform3D::Translate(0.f, 0.f, -2.0f);
@@ -527,10 +527,31 @@ void Tema3::LoadTextures() {
 	}
 
 	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["caramida"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/piatra2.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["pietreGri"] = texture;
+	}
+
+	{
 		const string textureLoc = "Source/Laboratoare/Tema3/Textures/scoarta_copac.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["copac"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/copac1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["copac1"] = texture;
 	}
 
 	{
@@ -601,6 +622,49 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["apa"] = texture;
+	}
+
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/gold.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["aur"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/ice.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["gheata"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/culori.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["wool"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/cadou.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["cadou"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/cadou1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["cadou1"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/gold1.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["gold1"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/silver.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["silver"] = texture;
 	}
 }
 
@@ -891,9 +955,47 @@ void Tema3::LoadStars() {
 	int i;
 	for (i = 0; i < lives; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(3 + i, 3.5f, -7.5f);
-		modelMatrix *= Transform3D::Scale(0.1, 0.1, 0.1);
+		modelMatrix *= Transform3D::Translate(-3.65 + i / 2.75f, 3.75f, 0.55f);
+		modelMatrix *= Transform3D::Scale(0.05, 0.05, 0.05);
 		RenderMesh(meshes["star"], shaders["VertexColor"], modelMatrix);
+	}
+}
+
+//intoarce true daca obstacolul cu indexul index are coliziune cu sfera
+bool Tema3::CheckObstacleCollision(int index) {
+	bool ok = false;
+	glm::vec4 playerCoord = player.getActualPlayerCoords();
+	float i;
+	//stabileste coordonatele suprafetei obstacolului
+	float max_step = obstaclesPos[index].y + obstacleHeight / 2;
+	float step = obstaclesPos[index].y - obstacleHeight / 2;
+	float zCoord;
+	float xCoord;
+	float yCoord;
+	for (i = step; i < max_step; i += 0.01f) {
+		float yCoord = i;
+		//verifica daca punctul obstacolului cel mai apropiat de sfera este plasat in interiorul sferei
+		xCoord = obstaclesPos[index].x;
+		zCoord = obstaclesPos[index].z;
+		float distance = sqrt(pow((xCoord - playerCoord.x), 2) + pow((yCoord - playerCoord.y), 2) + pow((zCoord - playerCoord.z), 2));
+
+		if (distance <= 1) { //coliziune
+			ok = true;
+		}
+	}
+
+	return ok;
+}
+
+void Tema3::CheckObstacleCollisions() {
+	//verifica coliziunea cu cele 6 obstacole si actualizeaza numarul de vieti
+	int i;
+	for (i = 0; i < 6; i++) {
+		if (collideCheckValues[i] == false && CheckObstacleCollision(i) == true) {
+			cout << "Coliziune cu obstacolul " << i << endl;
+			lives--;
+			collideCheckValues[i] = true;
+		}
 	}
 }
 
@@ -1320,6 +1422,58 @@ bool Tema3::checkCollision(int index) {
 	return ok;
 }
 
+void Tema3::LoadObstacles(float time) {
+	if (start == true && fallingPlayer == false) {
+		translateObstacles += 7.5f * time;
+	}
+	
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(1.65f, 0.25, -5 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[0] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["lemn"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-3.45f, 0.25, -20 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[1] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["pietreGri"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(1.65f, 0.25, -35 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[2] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["pietreGri"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-3.45f, 0.25, -35 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[3] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["lemn"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(1.65f, 0.25, -15 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[4] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["caramida"]);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-3.45f, 0.25, -45 + translateObstacles);
+	modelMatrix *= Transform3D::Scale(1.95f, 0.65f, 0.35f);
+	obstaclesPos[5] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["metal"]);
+	
+	if (translateObstacles >= 55) {
+		translateObstacles = -28;
+		//reinitializeaza coliziunile
+		int i;
+		for (i = 0; i < 6; i++) {
+			collideCheckValues[i] = false;
+		}
+	}
+	
+}
+
 void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 	//recalculeaza valorile pentru translatii
 	int i;
@@ -1395,7 +1549,6 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 		modelMatrix *= Transform3D::RotateOX(1.57);
 		RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["leaves"]);
 
-
 		modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(3.95f, 0, -5 + translateRightDecorValues[i]);
 		modelMatrix *= Transform3D::Scale(0.25, 1.5f, 0.25);
@@ -1409,7 +1562,7 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 		}
 		else {
-			translateRightDecorValues[i] = -45;
+			translateRightDecorValues[i] = -29;
 		}
 	}
 
@@ -1499,17 +1652,195 @@ void Tema3::LoadDecorElements(float deltaTimeSeconds) {
 			RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 		}
 		else {
-			translateLeftDecorValues[i] = -51;
+			translateLeftDecorValues[i] = -26;
 		}
 	}
 }
 
 void Tema3::LoadCollectionItem(float time) {
+	if (giftIsJumping == true) {//deplasare in sus pe OY pt cuburi
+		jumpingCube += 0.75f * time;
+		if (jumpingCube >= jumpMaxHeight) {
+			giftIsJumping = false;
+		}
+	}
+	else {
+		jumpingCube -= 0.75f * time;
+		if (jumpingCube < 0.10f) {
+			giftIsJumping = true;
+		}
+	}
+	rotAngle += 0.75f * time;
+	if (start == true && fallingPlayer == false) {
+		int i;
+		for (i = 0; i < 7; i++) {
+			translateCollectionItem[i] += 7.5f * time;
+			if (collectionItemsPos[i].z >= 10) {
+				translateCollectionItem[i] = -20;
+				collectionCheckValues[i] = false;
+			}
+		}
+	}
+	//el. colectabil 0
 	glm::mat4 modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(-2.65f, 1.5f, -5.25f);
-	modelMatrix *= Transform3D::Scale(1, 0.75, 0.5);
-	modelMatrix *= Transform3D::RotateOZ(-1);
-	RenderSimpleMesh(meshes["diamant"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+	modelMatrix *= Transform3D::Translate(-2.65f, 0.75f, -8.25f + translateCollectionItem[0]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(rotAngle);
+	glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[0] = position;
+	itemBoundingSpheres[0] = collectionItemsPos[0];
+	itemRadius[0] = 0.65f;
+	if (collectionCheckValues[0] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["gheata"]);
+	}
+	
+
+	//el. colectabil 1
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.85f, 0.75f, -8.25f + translateCollectionItem[1]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(-rotAngle);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[1] = position;
+	itemRadius[1] = 0.65f;
+	itemBoundingSpheres[1] = collectionItemsPos[1];
+	if (collectionCheckValues[1] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["aur"]);
+	}
+	
+
+	//el. colectabil 2
+	//forma formata din 2 piramide unite
+	//piramida de sus
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.85f, 0.75f, -18.25f + translateCollectionItem[2]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(-rotAngle);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[2] = position;
+	itemRadius[2] = 0.65f;
+	itemBoundingSpheres[2] = collectionItemsPos[2];
+	if (collectionCheckValues[2] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["aur"]);
+	}
+	//piramida de jos
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.85f, 0.10f, -18.25f + translateCollectionItem[2]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(-rotAngle);
+
+	modelMatrix *= Transform3D::RotateOX(1.57);
+	modelMatrix *= Transform3D::RotateOY(1.57);
+	modelMatrix *= Transform3D::RotateOZ(1.57);
+	if (collectionCheckValues[2] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["aur"]);
+	}
+
+
+	//el. colectabil 3
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-2.65f, jumpingCube, -18.25f + translateCollectionItem[3]);
+
+	modelMatrix *= Transform3D::Scale(0.65, 0.65, 0.65);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[3] = position;
+	itemBoundingSpheres[3] = collectionItemsPos[3];
+	itemRadius[3] = 0.65f;
+	if (collectionCheckValues[3] == false) {
+		RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["cadou"]);
+	}
+
+	//el. colectabil 4
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(2.65f, jumpingCube, -10.25f + translateCollectionItem[4]);
+	modelMatrix *= Transform3D::Scale(0.65, 0.65, 0.65);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[4] = position;
+	itemBoundingSpheres[4] = collectionItemsPos[4];
+	itemRadius[4] = 0.65f;
+	if (collectionCheckValues[4] == false) {
+		RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["cadou1"]);
+	}
+
+	//el. colectabil 5
+	//format din 2 piramide
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0.25f, 0.75f, -20.25f + translateCollectionItem[5]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(-rotAngle);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[5] = position;
+	itemBoundingSpheres[5] = collectionItemsPos[5];
+	itemRadius[5] = 0.65f;
+	if (collectionCheckValues[5] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["gheata"]);
+	}
+	//piramida de jos
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(0.25f, 0.10f, -20.25f + translateCollectionItem[5]);
+	modelMatrix *= Transform3D::Scale(0.75, 0.65, 0.65);
+	modelMatrix *= Transform3D::RotateOY(-rotAngle);
+
+	modelMatrix *= Transform3D::RotateOX(1.57);
+	modelMatrix *= Transform3D::RotateOY(1.57);
+	modelMatrix *= Transform3D::RotateOZ(1.57);
+	if (collectionCheckValues[5] == false) {
+		RenderMeshTex(meshes["piramida"], shaders["textureShader"], modelMatrix, mapTextures["gheata"]);
+	}
+
+	//el. colectabil 6
+	modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-0.5f, jumpingCube, -30.25f + translateCollectionItem[6]);
+	modelMatrix *= Transform3D::Scale(0.65, 0.65, 0.65);
+	position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+	collectionItemsPos[6] = position;
+	itemBoundingSpheres[6] = collectionItemsPos[6];
+	itemRadius[6] = 0.65f;
+	if (collectionCheckValues[6] == false) {
+		RenderMeshTex(meshes["cub_stilizat"], shaders["textureShader"], modelMatrix, mapTextures["cadou1"]);
+	}
+}
+
+//verifica coliziunea jucatorul cu elementul colectabil de indice index
+bool Tema3::CheckCollectionItemCollision(int index) {
+	bool ok = false;
+	glm::vec3 itemPos = itemBoundingSpheres[index];
+	glm::vec3 playerPos = player.getActualPlayerCoords();
+	float distance = sqrt(pow((playerPos.x - itemPos.x), 2) + pow((playerPos.y - itemPos.y), 2) + pow((playerPos.z - itemPos.z), 2));
+	
+	//distance < suma razelor
+	if (distance < 0.5 + itemRadius[index]) {
+		ok = true; //coliziune
+	}
+	return ok;
+}
+
+//verifica coliziunile cu elementele colectabile
+void Tema3::CheckCollectionItems() {
+	int i;
+	for (i = 0; i < 7; i++) {
+		if (collectionCheckValues[i] == false) {
+			if (CheckCollectionItemCollision(i) == true) {
+				cout << "Coliziune cu colectabilul de indice " << i << endl;
+				collectionCheckValues[i] = true; //retine coliziunile cu elementul colectabil
+				scorValue += 10;
+			}
+		}
+	}
+}
+
+void Tema3::LoadScoreInfo() {
+	glm::mat4 modelMatrix1 = glm::mat4(1);
+	
+	modelMatrix1 *= Transform3D::Translate(scoreInfoPos.x, scoreInfoPos.y, scoreInfoPos.z);
+	modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
+	glm::mat4 modelMatrix = glm::mat4(1);
+	
+	modelMatrix *= Transform3D::Translate(scoreInfoPos.x + 1.25f * scorValue / maxScore / 2 - 1.25f / 2, scoreInfoPos.y, scoreInfoPos.z);
+	modelMatrix *= Transform3D::Scale(1.25f * scorValue / maxScore, 0.25f, 1.25f);
+	
+	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["gold1"]);
+	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix1, mapTextures["silver"]);
 }
 
 void Tema3::LoadLamps(float time) {
@@ -1569,62 +1900,32 @@ void Tema3::LoadLamps(float time) {
 }
 
 void Tema3::Update(float deltaTimeSeconds)
-{/*
+{
+	LoadObstacles(deltaTimeSeconds);
+	LoadDecorElements(deltaTimeSeconds);
+	LoadLamps(deltaTimeSeconds);
+	LoadCollectionItem(deltaTimeSeconds);
+	LoadStars(); //reprezinta vietile jucatorului
+	CheckObstacleCollisions();
+	CheckCollectionItems();
+	LoadScoreInfo();
+	//s-au irosit toate vietile
 	if (start == true) {
-		int i;
-		for (i = 0; i < 3; i++) {
-			translateWaterPlan[i] += 7.5f * deltaTimeSeconds;
-			if (waterPos[i] > 6) {
-				cout << waterPos[i] << endl;
-				if (i == 0) {
-					translateWaterPlan[i] = -30;
-				}
-				if (i == 1) {
-					translateWaterPlan[i] = -150;
-				}
-				if (i == 2) {
-					translateWaterPlan[i] = -180;
-				}
-			}
+		if (lives <= 0) {
+			cout << "Ai pierdut toate vietile" << endl;
+			start = false;
 		}
 	}
 	
-	glm::mat4 modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(0, -2, -5 + translateWaterPlan[0]);
-	modelMatrix *= Transform3D::Scale(9, 9000, 20);
-	modelMatrix *= Transform3D::RotateOX(-1.57);
-	glm::vec3 pos = modelMatrix * glm::vec4(0, 0, 0, 1);
-	waterPos[0] = pos.z;
-	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
-
-	modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(0, -2, -20 + translateWaterPlan[1]);
-	modelMatrix *= Transform3D::Scale(10, 2000, 20);
-	modelMatrix *= Transform3D::RotateOX(-1.57);
-	pos = modelMatrix * glm::vec4(0, 0, 0, 1);
-	waterPos[1] = pos.z;
-	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
-
-	modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(0, -2, -40 + translateWaterPlan[2]);
-	modelMatrix *= Transform3D::Scale(10, 2000, 20);
-	modelMatrix *= Transform3D::RotateOX(-1.57);
-	pos = modelMatrix * glm::vec4(0, 0, 0, 1);
-	waterPos[2] = pos.z;
-	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["apa"]);
-	*/
-
-	LoadDecorElements(deltaTimeSeconds);
-	LoadLamps(deltaTimeSeconds);
-	glm::mat4 modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(-2, 2, -4);
-	RenderMeshTex(meshes["cilindru"], shaders["textureShader"], modelMatrix, mapTextures["grass"]);
 
 	if (fallingPlayer == true) {
 		//glClearColor(1.000, 0.855, 0.725, 1);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		LoadDecorElements(deltaTimeSeconds);
 		LoadLamps(deltaTimeSeconds);
+		LoadObstacles(deltaTimeSeconds);
+		LoadCollectionItem(deltaTimeSeconds);
+		LoadStars(); //vietile jucatorului
 	}
 	
 	if (start == true && fallingPlayer == false) {
@@ -1655,7 +1956,7 @@ void Tema3::Update(float deltaTimeSeconds)
 			collideCheck = true;
 		}
 	}
-
+	/*
 	if (fuelValue <= 0) { //verifica numarul de vieiti la terminarea combustibilului
 		if (lives == 0) {
 			gameOver = true;
@@ -1666,8 +1967,7 @@ void Tema3::Update(float deltaTimeSeconds)
 			fuelValue = initialFuelValue; //reinitializeaza combustibilul
 			lives--;
 		}
-		
-	}
+	}*/
 
 	//renderFuelInformation(deltaTimeSeconds);
 	//daca jucatorul nu are coliziune cu nicio platforma iar jocul nu este in nicio situatie speciala
