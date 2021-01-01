@@ -36,6 +36,13 @@ private:
 	void LoadCollectionItem(float time);
 	void LoadObstacles(float time);
 	Mesh* CreatePyramid();
+	bool CheckObstacleCollision(int index);
+	bool CheckCollectionItemCollision(int index);
+	void CheckCollectionItems();
+	void LoadScoreInfo(); 
+
+
+	void CheckObstacleCollisions();
 
 	void FrameStart() override;
 	void Update(float deltaTimeSeconds) override;
@@ -108,7 +115,7 @@ private:
 	bool orangeAbility; //este true daca este activata abilitatea data de  platforma orange
 	clock_t startMom; //momentul de start al aplicatii abilitatii
 	float diffFactor; //combustibilul se termina mai repede o data cu cresterea dificulatii jocului
-	int lives = 3; //numar initial de vieti
+	int lives = 5; //numar initial de vieti
 
 	std::unordered_map<std::string, Texture2D*> mapTextures;
 
@@ -143,8 +150,33 @@ private:
 	std::vector<float> waterPos = std::vector<float>(4);
 
 	float translateObstacles; 
-	float translateCollectionItem;
+	
+	//retine valorile tranzitiile pentru cele 8 elemente colectabile
+	std::vector<float> translateCollectionItem = std::vector<float>(7);
 
 	//retine pozitiile pentru cele 6 obstacole
-	std::vector<glm::vec3> obstacesPos = std::vector<glm::vec3>(7);
+	std::vector<glm::vec3> obstaclesPos = std::vector<glm::vec3>(7);
+	float rotAngle;
+
+	std::vector<glm::vec3> collectionItemsPos = std::vector<glm::vec3>(7);
+	float jumpingCube; //elementele colectibile reprezentate prin cuuburi sunt translatate initial in sensul pozitiv al axei oY
+	bool giftIsJumping = true;
+	float jumpMaxHeight = 0.75f;
+
+	float obstacleHeight = 0.65f;
+
+	//retine daca s-a produc coliziune cu cele 6 obstacole
+	std::vector<bool> collideCheckValues = std::vector<bool>(7);
+
+	std::vector<bool> collectionCheckValues = std::vector<bool>(7);
+
+	//retine coordonatele pentru bounding spheres asociate fiecarui element colectabil vizibil in scena la un moment dat
+	std::vector<glm::vec3> itemBoundingSpheres = std::vector<glm::vec3>(7);
+	std::vector<float> itemRadius = std::vector<float>(7); //retine valorile razelor boundingSpheres asociate elementelor decorative
+
+	float scorValue; //retine scorul obtinut de jucator
+	float maxScore = 150;
+
+
+	glm::vec3 scoreInfoPos = glm::vec3(2.5f, 3.75f, 0.55f);
 };
