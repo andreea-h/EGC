@@ -20,19 +20,18 @@ out vec3 fCoord;
 uniform float time;
 uniform float rand;
 
-float randGen(vec3 co)
+float randGen(vec3 vect)
 {
-    float a = 12.9898;
-    float b = 78.233;
-    float c = 48.5453;
-    float dt= dot(co, vec3(a, b, c));
-    float sn= mod(dt,3.14);
-    return fract(sin(sn) * c);
+    float x = 1.90139;
+    float y = 2.21333;
+    float z = 3.84533;
+    float product = dot(vect, vec3(x, y, z));
+    float value = mod(dot(vect, vec3(x, y, z)), 3.14);
+    return fract(sin(value) * x * y * z);
 }
 
 void main()
 {
-	
 	// TODO: send output to fragment shader
 	fPosition = v_position;
 	fCoord = text_coord;

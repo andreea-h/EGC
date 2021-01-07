@@ -315,6 +315,18 @@ void Tema2::setTranslatePoints()
 	for (i = 9; i < 12; i++) {
 		platforms->setTranslatePoint(i, -5.5f - maxCoord - 3 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2);
 	}
+
+	float maxCoord3 = -999;
+	for (i = 9; i < 12; i++)
+	{
+		if (platforms->getPlatformSize(i) > maxCoord3) {
+			maxCoord3 = platforms->getPlatformSize(i);
+		}
+	}
+
+	for (i = 12; i < 15; i++) {
+		platforms->setTranslatePoint(i, -5.5f - maxCoord - 4 - platforms->getPlatformSize(i) / 2 - maxCoord1 - maxCoord2 - maxCoord3);
+	}
 }
 
 void Tema2::LoadStars() {
@@ -382,6 +394,17 @@ void Tema2::LoadPlatforms() {
 	for (i = 9; i < 12; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(2.5f * (i - 10), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
+		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
+		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
+		float zCoord = position.z;
+		platforms->setPlatformXCoord(position.x, i);
+		platforms->setPlatformYCoord(position.y, i);
+		platforms->setPlatformZCoord(zCoord - platforms->getPlatformSize(i) / 2, i);
+		RenderSimpleMesh(meshes["box"], shaders["colorShader"], modelMatrix, platforms->getPlatformColor(i));
+	}
+	for (i = 12; i < 15; i++) {
+		glm::mat4 modelMatrix = glm::mat4(1);
+		modelMatrix *= Transform3D::Translate(2.5f * (i - 13), 0, platforms->getTranslatePoint(i) + platforms->getTranslateVal(i));
 		modelMatrix *= Transform3D::Scale(1.95f, 0.25f, platforms->getPlatformSize(i));
 		glm::vec3 position = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
 		float zCoord = position.z;
@@ -682,6 +705,7 @@ void Tema2::Update(float deltaTimeSeconds)
 	if (fallingPlayer == true) {
 		glClearColor(1.000, 0.855, 0.725, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		LoadStars();
 	}
 	if (endMom >= 5000) {//5sec
 		orangeAbility = false;
@@ -689,14 +713,14 @@ void Tema2::Update(float deltaTimeSeconds)
 	}
 	if (start == true && fallingPlayer == false) {
 		int i;
-		for (i = 0; i < 12; i++) {
+		for (i = 0; i < 15; i++) {
 			if (orangeAbility == true) {
 				prizeFactor = 4;
 			}
-			platforms->setTranslateVal(platforms->getTranslateVal(i) + 4.5f * deltaTimeSeconds + prizeFactor * deltaTimeSeconds, i);
+			platforms->setTranslateVal(platforms->getTranslateVal(i) + 7.5f * deltaTimeSeconds + prizeFactor * deltaTimeSeconds, i);
 		}
 		if (play == false) { //calculeaza translateZ doar daca platforma de start inca mai este redata in scena
-			translateZ += 4.5f * deltaTimeSeconds;
+			translateZ += 8.5f * deltaTimeSeconds;
 		}
 	}
 
@@ -845,8 +869,8 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 	if (window->KeyHold(GLFW_KEY_W)) { //mareste viteza de deplasare a platformelor 
 		if (orangeAbility == false) {
 			int i;
-			for (i = 0; i < 9; i++) {
-				platforms->setTranslateVal(platforms->getTranslateVal(i) + 1.75 * deltaTime, i);
+			for (i = 0; i < 15; i++) {
+				platforms->setTranslateVal(platforms->getTranslateVal(i) + 2.75 * deltaTime, i);
 			}
 		}
 	}
@@ -854,7 +878,7 @@ void Tema2::OnInputUpdate(float deltaTime, int mods)
 	if (window->KeyHold(GLFW_KEY_S)) { //scade viteza de deplasare a platformelor
 		if (orangeAbility == false) {
 			int i;
-			for (i = 0; i < 9; i++) {
+			for (i = 0; i < 15; i++) {
 				platforms->setTranslateVal(platforms->getTranslateVal(i) - 1.25f * deltaTime, i);
 			}
 		}
