@@ -53,12 +53,12 @@ Tema3::Tema3()
 
 	}
 
-	lightPosition = glm::vec3(4.f, 2.5f, 3.f);
-	materialShininess = 50;
-	materialKd = 0.5;
-	materialKs = 0.5;
-
-	cutOff = (float)M_PI / 6.f;
+	
+	
+	materialKd = 1.5;
+	materialKs = 1.5;
+	materialShininess = 70;
+	cutOff = (float)M_PI / 3.5f;
 }
 
 Tema3::~Tema3()
@@ -803,7 +803,7 @@ void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatr
 	int i;
 	//for (i = 0; i < 6; i++) {
 		int headlight_position = glGetUniformLocation(shader->program, "spotLightPosition");
-		glUniform3f(headlight_position, spotLightPosition[0].x, spotLightPosition[0].y, spotLightPosition[0].z);
+		glUniform3f(headlight_position, spotLightPosition[3].x, spotLightPosition[3].y, spotLightPosition[3].z);
 
 		int headlight_direction = glGetUniformLocation(shader->program, "spotLightDirection");
 		glUniform3f(headlight_direction, spotLightDirection[0].x, spotLightDirection[0].y, spotLightDirection[0].z);
@@ -1831,11 +1831,14 @@ void Tema3::CheckCollectionItems() {
 
 void Tema3::LoadScoreInfo() {
 	glm::mat4 modelMatrix1 = glm::mat4(1);
+	
 	modelMatrix1 *= Transform3D::Translate(scoreInfoPos.x, scoreInfoPos.y, scoreInfoPos.z);
 	modelMatrix1 *= Transform3D::Scale(1.25f, 0.25f, 1.25f);
 	glm::mat4 modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(scoreInfoPos.x, scoreInfoPos.y, scoreInfoPos.z);
-	modelMatrix *= Transform3D::Scale(1.25f *  scorValue / maxScore, 0.25f, 1.25f);
+	
+	modelMatrix *= Transform3D::Translate(scoreInfoPos.x + 1.25f * scorValue / maxScore / 2 - 1.25f / 2, scoreInfoPos.y, scoreInfoPos.z);
+	modelMatrix *= Transform3D::Scale(1.25f * scorValue / maxScore, 0.25f, 1.25f);
+	
 	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix, mapTextures["gold1"]);
 	RenderMeshTex(meshes["patrat"], shaders["textureShader"], modelMatrix1, mapTextures["silver"]);
 }
@@ -1858,8 +1861,8 @@ void Tema3::LoadLamps(float time) {
 			translateRightLampsValues[i] = -110;
 		}
 
-		spotLightPosition[i] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		spotLightDirection[i] = glm::vec4(0.f, 0.f, 0.f, 1.f);
+		spotLightPosition[i] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f) + glm::vec4(0, 0.5, 0, 0);
+		
 
 
 		modelMatrix = glm::mat4(1);
@@ -1898,6 +1901,8 @@ void Tema3::LoadLamps(float time) {
 
 void Tema3::Update(float deltaTimeSeconds)
 {
+	spotLightDirection[0] = glm::vec3(2, 2, -10);
+	lightPosition = glm::vec3(3.65f, 3.0f, RightLampsPos[1]);
 	LoadObstacles(deltaTimeSeconds);
 	LoadDecorElements(deltaTimeSeconds);
 	LoadLamps(deltaTimeSeconds);

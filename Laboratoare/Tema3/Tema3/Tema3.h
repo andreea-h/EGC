@@ -69,6 +69,8 @@ protected:
 private:
 	float FoV;
 	glm::vec3 lightPosition;
+	glm::vec3 lightDirection;
+
 	unsigned int materialShininess;
 	float materialKd;
 	float materialKs;
