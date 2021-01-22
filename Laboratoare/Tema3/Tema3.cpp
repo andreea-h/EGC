@@ -857,6 +857,73 @@ void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatr
 		//cout << shader_code << endl;
 	}
 
+	for (i = 0; i < 4; i++) {
+		string value = "spotLights[";
+		string aux = value.append(std::to_string(i));
+		string result = aux.append("].position");
+		const GLchar* shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code),
+			spotLightPositions[i].x, spotLightPositions[i].y, spotLightPositions[i].z);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].direction");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 
+			spotLightDirections[i].x, spotLightDirections[i].y, spotLightDirections[i].z);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].ambient");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0.25, 0.25, 0.25);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].diffuse");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0, 0, 0);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].specular");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 1, 1, 1);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].linear");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.9);
+		//cout << shader_code << endl;
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].quadratic");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.032);
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].constant");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 1.0f);
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].color");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), lightColors[i].x, lightColors[i].y, lightColors[i].z);
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].cutOff");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(45.0f)));
+		value = "spotLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].outerCutOff");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(45.0f)));
+		//cout << shader_code << endl;
+	}
+
 	// Bind model matrix
 	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "model");
 	glUniformMatrix4fv(loc_modelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -1955,6 +2022,24 @@ void Tema3::Update(float deltaTimeSeconds)
 		glm::vec3(3.65f, 2.0f, RightLampsPos[6]),
 
 		glm::vec3(-4.65f, 2.0f, LeftLampsPos[0]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[1]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[2]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[3]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[4]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[5]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[6])
+	};
+	glm::vec3 spotLightPositions[] = {
+		glm::vec3(3.65f, 5.0f, RightLampsPos[0]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[0]),
+		
+		glm::vec3(3.65f, 2.0f, RightLampsPos[2]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[3]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[4]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[5]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[6]),
+
+		glm::vec3(3.65f, 2.0f, RightLampsPos[1]),
 		glm::vec3(-4.65f, 2.0f, LeftLampsPos[1]),
 		glm::vec3(-4.65f, 2.0f, LeftLampsPos[2]),
 		glm::vec3(-4.65f, 2.0f, LeftLampsPos[3]),
