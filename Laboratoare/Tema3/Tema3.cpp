@@ -836,19 +836,19 @@ void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatr
 		aux = value.append(std::to_string(i));
 		result = aux.append("].constant");
 		shader_code = result.c_str();
-		glUniform1f(glGetUniformLocation(shader->program, shader_code), 1.0f);
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 1.0f);//1
 		//cout << shader_code << endl;
 		value = "pointLights[";
 		aux = value.append(std::to_string(i));
 		result = aux.append("].linear");
 		shader_code = result.c_str();
-		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.014);
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.045);//0.014
 		//cout << shader_code << endl;
 		value = "pointLights[";
 		aux = value.append(std::to_string(i));
 		result = aux.append("].quadratic");
 		shader_code = result.c_str();
-		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.0007);
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.0075);//0.0007
 		value = "pointLights[";
 		aux = value.append(std::to_string(i));
 		result = aux.append("].color");
@@ -876,13 +876,13 @@ void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatr
 		aux = value.append(std::to_string(i));
 		result = aux.append("].ambient");
 		shader_code = result.c_str();
-		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0.25, 0.25, 0.25);
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0.2, 0.2, 0.2);
 		//cout << shader_code << endl;
 		value = "spotLights[";
 		aux = value.append(std::to_string(i));
 		result = aux.append("].diffuse");
 		shader_code = result.c_str();
-		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0, 0, 0);
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 1, 1, 1);
 		//cout << shader_code << endl;
 		value = "spotLights[";
 		aux = value.append(std::to_string(i));
@@ -915,12 +915,12 @@ void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatr
 		aux = value.append(std::to_string(i));
 		result = aux.append("].cutOff");
 		shader_code = result.c_str();
-		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(45.0f)));
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(15.0f)));
 		value = "spotLights[";
 		aux = value.append(std::to_string(i));
 		result = aux.append("].outerCutOff");
 		shader_code = result.c_str();
-		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(45.0f)));
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), glm::cos(glm::radians(0.0f)));
 		//cout << shader_code << endl;
 	}
 
@@ -2002,6 +2002,19 @@ void Tema3::LoadLamps(float time) {
 
 void Tema3::Update(float deltaTimeSeconds)
 {
+	spotLightPositions[0] = glm::vec3(3.65f, 1.85, RightLampsPos[1]);//0
+	spotLightPositions[1] = glm::vec3(3.65f, 1.85, RightLampsPos[4]);//-1
+	spotLightPositions[2] = glm::vec3(3.65f, 1.85, RightLampsPos[3]);//-2
+	spotLightPositions[3] = glm::vec3(3.65f, 1.85, RightLampsPos[5]);
+
+
+
+	spotLightDirections[0] = glm::vec3(3.25f, 0, RightLampsPos[1]);
+	spotLightDirections[1] = glm::vec3(3.25f, 0, RightLampsPos[4]);
+	spotLightDirections[2] = glm::vec3(3.25f, 0, RightLampsPos[3]);
+	spotLightDirections[3] = glm::vec3(3.25f, 0, RightLampsPos[5]);
+
+
 	LoadObstacles(deltaTimeSeconds);
 	LoadDecorElements(deltaTimeSeconds);
 	LoadLamps(deltaTimeSeconds);
@@ -2011,42 +2024,9 @@ void Tema3::Update(float deltaTimeSeconds)
 	CheckCollectionItems();
 	LoadScoreInfo();
 	//pozitie "soare" -3.45f, 3.75f, -0.05f
-	glm::vec3 pointLightPositions[] = {
-		glm::vec3(-3.55f, 3.35, -0.05f),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[0]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[1]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[2]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[3]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[4]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[5]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[6]),
+	pointLightPositions[0] = glm::vec3(-3.55f, 3.25, -0.05f);
+	
 
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[0]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[1]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[2]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[3]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[4]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[5]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[6])
-	};
-	glm::vec3 spotLightPositions[] = {
-		glm::vec3(3.65f, 5.0f, RightLampsPos[0]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[0]),
-		
-		glm::vec3(3.65f, 2.0f, RightLampsPos[2]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[3]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[4]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[5]),
-		glm::vec3(3.65f, 2.0f, RightLampsPos[6]),
-
-		glm::vec3(3.65f, 2.0f, RightLampsPos[1]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[1]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[2]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[3]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[4]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[5]),
-		glm::vec3(-4.65f, 2.0f, LeftLampsPos[6])
-	};
 	//s-au irosit toate vietile
 	if (start == true) {
 		if (lives <= 0) {
@@ -2127,7 +2107,7 @@ void Tema3::Update(float deltaTimeSeconds)
 	}
 	sunAngle += 0.5f * deltaTimeSeconds;
 	glm::mat4 modelMatrix = glm::mat4(1);
-	modelMatrix *= Transform3D::Translate(-3.55f, 3.35, -0.05f); //=point light position
+	modelMatrix *= Transform3D::Translate(-3.55f, 3.45, -0.05f); //=point light position
 	modelMatrix *= Transform3D::RotateOY(sunAngle);
 	modelMatrix *= Transform3D::Scale(0.60, 0.60, 0.60);
 	RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(), mapTextures["sun"]);

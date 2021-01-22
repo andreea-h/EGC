@@ -145,8 +145,8 @@ private:
 	std::vector<float> flowersRightPos3 = std::vector<float>(7);
 	std::vector<float> flowersLeftPos3 = std::vector<float>(7);
 
-	std::vector<glm::vec3> spotLightPosition = std::vector<glm::vec3>(7);
-	std::vector<glm::vec3> spotLightDirection = std::vector<glm::vec3>(7);
+	//std::vector<glm::vec3> spotLightPosition = std::vector<glm::vec3>(7);
+	//std::vector<glm::vec3> spotLightDirection = std::vector<glm::vec3>(7);
 
 	std::vector<float> translateWaterPlan = std::vector<float>(4);
 	std::vector<float> waterPos = std::vector<float>(4);
@@ -186,10 +186,10 @@ private:
 	glm::vec3 pointLightPositions[14];
 
 	glm::vec3 lightColors[14] = {
-		glm::vec3(0.098, 0.098, 0.439),
-		glm::vec3(0.282, 0.820, 0.800),
-		glm::vec3(0.824, 0.412, 0.118),
-		glm::vec3(0.933, 0.510, 0.933),
+		glm::vec3(1.000, 0.078, 0.576),
+		glm::vec3(0.000, 0.000, 1.000),
+		glm::vec3(1.000, 0.271, 0.000),
+		glm::vec3(1.000, 1.000, 0.000),
 		glm::vec3(0.545, 0.000, 0.545),
 		glm::vec3(0.596, 0.984, 0.596),
 		glm::vec3(1.000, 0.843, 0.000),
@@ -218,7 +218,6 @@ private:
 		glm::vec3(0, -1, 0),
 		glm::vec3(0, -1, 0),
 		glm::vec3(0, -1, 0)
-		
 	};
 
 	float sunAngle = 0;
