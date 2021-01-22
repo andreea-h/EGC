@@ -49,7 +49,7 @@ private:
 	void FrameEnd() override;
 
 	void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix) override;
-	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color);
+	void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, Texture2D* texture);
 	void RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture);
 
 	void OnInputUpdate(float deltaTime, int mods) override;
@@ -69,6 +69,8 @@ protected:
 private:
 	float FoV;
 	glm::vec3 lightPosition;
+	glm::vec3 lightDirection;
+
 	unsigned int materialShininess;
 	float materialKd;
 	float materialKs;
@@ -179,4 +181,27 @@ private:
 
 
 	glm::vec3 scoreInfoPos = glm::vec3(2.5f, 3.75f, 0.55f);
+
+	//pozitii pentru sursele de lumina point light
+	glm::vec3 pointLightPositions[14];
+
+	glm::vec3 lightColors[14] = {
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(0.282, 0.820, 0.800),
+		glm::vec3(0.824, 0.412, 0.118),
+		glm::vec3(0.933, 0.510, 0.933),
+		glm::vec3(0.545, 0.000, 0.545),
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(1.000, 0.843, 0.000),
+		glm::vec3(1.000, 0.271, 0.000),
+		glm::vec3(1.000, 0.843, 0.000),
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(0.596, 0.984, 0.596),
+		glm::vec3(0.596, 0.984, 0.596)
+	};
+
+
+	float sunAngle = 0;
 };

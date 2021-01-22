@@ -3,7 +3,7 @@
 // TODO: get vertex attributes from each location
 layout (location =0) in vec3 v_position;
 layout (location =1) in vec3 v_normal;  
-layout (location =2) in vec3 text_coord;
+layout (location =2) in vec2 text_coord;
 layout (location =3) in vec3 v_color;
 
 // Uniform properties
@@ -15,7 +15,7 @@ uniform mat4 Projection;
 out vec3 fNormal;
 out vec3 fColor;
 out vec3 fPosition;
-out vec3 fCoord;
+out vec2 fCoord;
 
 void main()
 {

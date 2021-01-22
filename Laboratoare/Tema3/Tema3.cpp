@@ -53,12 +53,12 @@ Tema3::Tema3()
 
 	}
 
-	lightPosition = glm::vec3(4.f, 2.5f, 3.f);
-	materialShininess = 50;
-	materialKd = 0.5;
-	materialKs = 0.5;
-
-	cutOff = (float)M_PI / 6.f;
+	
+	
+	materialKd = 1.5;
+	materialKs = 1.5;
+	materialShininess = 70;
+	cutOff = (float)M_PI / 3.5f;
 }
 
 Tema3::~Tema3()
@@ -228,7 +228,8 @@ void Tema3::LoadMeshes() {
 				0, 1, 3,
 				1, 2, 3
 			};
-
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			Mesh* mesh = new Mesh("patrat");
 			mesh->InitFromData(vertices, normals, textureCoords, indices);
 			meshes[mesh->GetMeshID()] = mesh;
@@ -506,6 +507,12 @@ void Tema3::LoadShaders() {
 void Tema3::LoadTextures() {
 	//load textures
 	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/face.png";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["marmura"] = texture;
+	}
+	{
 		const string textureLoc = "Source/Laboratoare/Tema3/Textures/frunze_copac.jpg";
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
@@ -587,6 +594,10 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["floare1"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
+		//texture->SetFiltering(GL_TEXTURE_MIN_FILTER);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 	
 	{
@@ -594,6 +605,7 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["floare2"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
 	}
 
 	{
@@ -601,6 +613,7 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["floare3"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
 	}
 
 	{
@@ -608,6 +621,7 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["floare4"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
 	}
 
 	{
@@ -615,6 +629,7 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["leaves"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
 	}
 
 	{
@@ -665,6 +680,13 @@ void Tema3::LoadTextures() {
 		Texture2D* texture = new Texture2D();
 		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
 		mapTextures["silver"] = texture;
+	}
+	{
+		const string textureLoc = "Source/Laboratoare/Tema3/Textures/sun.jpg";
+		Texture2D* texture = new Texture2D();
+		texture->Load2D(textureLoc.c_str(), GL_REPEAT);
+		mapTextures["sun"] = texture;
+		texture->SetFiltering(GL_NEAREST, GL_NEAREST);
 	}
 }
 
@@ -729,13 +751,6 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 	// TODO: Send indices data into the IBO buffer
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(),
 		&indices[0], GL_STATIC_DRAW);
-
-	// ========================================================================
-	// This section describes how the GPU Shader Vertex Shader program receives data
-	// It will be learned later, when GLSL shaders will be introduced
-	// For the moment just think that each property value from our vertex format needs to be send to a certain channel
-	// in order to know how to receive it in the GLSL vertex shader
-
 	// set vertex position attribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
@@ -768,73 +783,103 @@ Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& verti
 //render with textures
 void Tema3::RenderMeshTex(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
 {
-
 	if (!mesh || !shader || !shader->GetProgramID())
 		return;
 
 	// render an object using the specified shader and the specified position
 	glUseProgram(shader->program);
 
-	int timeLoc = glGetUniformLocation(shader->program, "time");
-	glUniform1f(timeLoc, Engine::GetElapsedTime());
+	GLint viewPosLoc = glGetUniformLocation(shader->program, "viewPos");
+	glUniform3f(viewPosLoc, camera->position.x, camera->position.y + 2, camera->position.z);
 
-	srand(time(NULL));
-	int randVal = glGetUniformLocation(shader->program, "rand");
-	glUniform1f(randVal, rand() % 100 + 10);
+	glUniform1i(glGetUniformLocation(shader->program, "material.diffuse"), 0);
+	glUniform1i(glGetUniformLocation(shader->program, "material.specular"), 1);
+	glUniform1f(glGetUniformLocation(shader->program, "material.shininess"), 36.0f);
 
-	GLint lightPosLoc = glGetUniformLocation(shader->program, "light_position");
-	glUniform3f(lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
+	int var = glGetUniformLocation(shader->program, "grass");
+	if (texture == mapTextures["leaves"] || texture == mapTextures["sun"]) {
+		glUniform1i(var, 1);
+	}
+	else {
+		glUniform1i(var, 0);
+	}
+	
 
-	glm::vec3 eyePosition = camera->position;
-	int eyePosLoc = glGetUniformLocation(shader->program, "eye_position");
-	glUniform3f(eyePosLoc, eyePosition.x, eyePosition.y, eyePosition.z);
-
-	GLint varLoc = glGetUniformLocation(shader->program, "kd");
-	glUniform1f(varLoc, materialKd);
-
-	varLoc = glGetUniformLocation(shader->program, "ks");
-	glUniform1f(varLoc, materialKs);
-
-	varLoc = glGetUniformLocation(shader->program, "shininess");
-	glUniform1i(varLoc, materialShininess);
-
-	int object_color = glGetUniformLocation(shader->program, "object_color");
-	glUniform3f(object_color, 0, 1, 0);
 	int i;
-	//for (i = 0; i < 6; i++) {
-		int headlight_position = glGetUniformLocation(shader->program, "spotLightPosition");
-		glUniform3f(headlight_position, spotLightPosition[0].x, spotLightPosition[0].y, spotLightPosition[0].z);
-
-		int headlight_direction = glGetUniformLocation(shader->program, "spotLightDirection");
-		glUniform3f(headlight_direction, spotLightDirection[0].x, spotLightDirection[0].y, spotLightDirection[0].z);
-	//}
-
-	int cut_off = glGetUniformLocation(shader->program, "cut_off");
-	glUniform1f(cut_off, cutOff);
+	for (i = 0; i < 1; i++) {
+		string value = "pointLights[";
+		string aux = value.append(std::to_string(i));
+		string result = aux.append("].position");
+		const GLchar* shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code),
+			pointLightPositions[i].x, pointLightPositions[i].y, pointLightPositions[i].z);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].ambient");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0.5f, 0.5f, 0.5f);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].diffuse");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 0.8f, 0.8f, 0.8f);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].specular");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), 1.5f, 1.5f, 1.5f);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].constant");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 1.0f);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].linear");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.014);
+		//cout << shader_code << endl;
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].quadratic");
+		shader_code = result.c_str();
+		glUniform1f(glGetUniformLocation(shader->program, shader_code), 0.0007);
+		value = "pointLights[";
+		aux = value.append(std::to_string(i));
+		result = aux.append("].color");
+		shader_code = result.c_str();
+		glUniform3f(glGetUniformLocation(shader->program, shader_code), lightColors[i].x, lightColors[i].y, lightColors[i].z);
+		//cout << shader_code << endl;
+	}
 
 	// Bind model matrix
-	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "Model");
+	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "model");
 	glUniformMatrix4fv(loc_modelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	// Bind view matrix
 	glm::mat4 viewMatrix = camera->GetViewMatrix();
-	int loc_viewMatrix = glGetUniformLocation(shader->program, "View");
+	int loc_viewMatrix = glGetUniformLocation(shader->program, "view");
 	glUniformMatrix4fv(loc_viewMatrix, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 	// Bind projection matrix
-	int loc_projectionMatrix = glGetUniformLocation(shader->program, "Projection");
+	int loc_projectionMatrix = glGetUniformLocation(shader->program, "projection");
 	glUniformMatrix4fv(loc_projectionMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
-	glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 0);
+	//glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 0);
 
 	// Draw the object
 	glBindVertexArray(mesh->GetBuffers()->VAO);
 	glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_SHORT, 0);
 }
 
-void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
+void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, Texture2D* texture)
 {
 	if (!mesh || !shader || !shader->GetProgramID())
 		return;
@@ -842,37 +887,6 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 	// render an object using the specified shader and the specified position
 	glUseProgram(shader->program);
 
-	int timeLoc = glGetUniformLocation(shader->program, "time");
-	glUniform1f(timeLoc, Engine::GetElapsedTime());
-
-	srand(time(NULL));
-	int randVal = glGetUniformLocation(shader->program, "rand");
-	glUniform1f(randVal, rand() % 100 + 10);
-
-	// Set shader uniforms for light & material properties
-	// TODO: Set light position uniform
-	GLint lightPosLoc = glGetUniformLocation(shader->program, "light_position");
-	glUniform3f(lightPosLoc, lightPosition.x, lightPosition.y, lightPosition.z);
-
-	// TODO: Set eye position (camera position) uniform
-	glm::vec3 eyePosition = camera->position;
-	int eyePosLoc = glGetUniformLocation(shader->program, "eye_position");
-	glUniform3f(eyePosLoc, eyePosition.x, eyePosition.y, eyePosition.z);
-
-	// TODO: Set material property uniforms (shininess, kd, ks, object color) 
-	//componeneta difuza=intensitatea de material difuza
-	GLint varLoc = glGetUniformLocation(shader->program, "kd");
-	glUniform1f(varLoc, materialKd);
-	//componenta speculara=intensitatea de material speculara
-	varLoc = glGetUniformLocation(shader->program, "ks");
-	glUniform1f(varLoc, materialKs);
-
-	varLoc = glGetUniformLocation(shader->program, "shininess");
-	glUniform1i(varLoc, materialShininess);
-
-	varLoc = glGetUniformLocation(shader->program, "object_color");
-	glUniform3f(varLoc, color.x, color.y, color.z);
-
 	// Bind model matrix
 	GLint loc_modelMatrix = glGetUniformLocation(shader->program, "Model");
 	glUniformMatrix4fv(loc_modelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -885,6 +899,20 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 	// Bind projection matrix
 	int loc_projectionMatrix = glGetUniformLocation(shader->program, "Projection");
 	glUniformMatrix4fv(loc_projectionMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+	int aux = glGetUniformLocation(shader->program, "usesTexture");
+	if (texture != NULL) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+		glUniform1i(glGetUniformLocation(shader->program, "textures"), 0);
+		glUniform1i(aux, 1);
+	}
+	else {
+		glUniform1i(aux, 0);
+	}
+
+	int object_color = glGetUniformLocation(shader->program, "object_color");
+	glUniform3f(object_color, 0.545, 0.000, 0.545);
 
 	// Draw the object
 	glBindVertexArray(mesh->GetBuffers()->VAO);
@@ -894,7 +922,7 @@ void Tema3::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelM
 void Tema3::FrameStart()
 {
 	// clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(0.529, 0.808, 0.980, 1);
+	//glClearColor(0.529, 0.808, 0.980, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -955,7 +983,8 @@ void Tema3::LoadStars() {
 	int i;
 	for (i = 0; i < lives; i++) {
 		glm::mat4 modelMatrix = glm::mat4(1);
-		modelMatrix *= Transform3D::Translate(-3.65 + i / 2.75f, 3.75f, 0.55f);
+		//2.5f, 3.75f, 0.55f
+		modelMatrix *= Transform3D::Translate(2.1f + i / 2.75f, 3.35f, 0.55f);
 		modelMatrix *= Transform3D::Scale(0.05, 0.05, 0.05);
 		RenderMesh(meshes["star"], shaders["VertexColor"], modelMatrix);
 	}
@@ -1204,7 +1233,7 @@ void Tema3::LoadPlayer(float delta) {
 			stopGame = true;
 		}
 		if (stopGame == false) {
-			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+			RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 
 			firstPersonCamPosition = glm::mat4(1);
 			firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
@@ -1230,10 +1259,12 @@ void Tema3::LoadPlayer(float delta) {
 
 		player.setActualCoords(coords);
 		if (collideCheck == false) {
-			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+			//RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545), NULL);
+			RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 		}
 		else {
-			RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.824, 0.412, 0.118));
+			//RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.824, 0.412, 0.118), NULL);
+			RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 		}
 
 		firstPersonCamPosition = glm::mat4(1);
@@ -1278,7 +1309,8 @@ void Tema3::LoadPlayer(float delta) {
 
 		player.setActualCoords(coords);
 
-		RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+		//RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545), NULL);
+		RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 
 		firstPersonCamPosition = glm::mat4(1);
 		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
@@ -1323,7 +1355,8 @@ void Tema3::LoadPlayer(float delta) {
 
 		player.setActualCoords(coords);
 
-		RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+		//RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545), NULL);
+		RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 
 		firstPersonCamPosition = glm::mat4(1);
 		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
@@ -1367,7 +1400,8 @@ void Tema3::LoadPlayer(float delta) {
 		//salveaza coordonatele actuale ale jucatorului
 
 		player.setActualCoords(coords);
-		RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545));
+		//RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(0.545, 0.000, 0.545), NULL);
+		RenderMeshTex(meshes["sphere"], shaders["textureShader"], modelMatrix, mapTextures["marmura"]);
 
 		firstPersonCamPosition = glm::mat4(1);
 		firstPersonCamPosition *= Transform3D::Translate(coords.x, coords.y + 0.15f, coords.z - 0.75f);
@@ -1861,9 +1895,8 @@ void Tema3::LoadLamps(float time) {
 			translateRightLampsValues[i] = -110;
 		}
 
-		spotLightPosition[i] = modelMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f);
-		spotLightDirection[i] = glm::vec4(0.f, 0.f, 0.f, 1.f);
-
+		RightLampsPos[i] = position.z;
+		
 
 		modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(3.95f, 0, -0.15f + translateRightLampsValues[i]);
@@ -1885,6 +1918,7 @@ void Tema3::LoadLamps(float time) {
 		if (position.z < 6.55f) {
 			RenderMeshTex(meshes["tetraedru"], shaders["textureShader"], modelMatrix, mapTextures["tabla"]);
 		}
+		LeftLampsPos[i] = position.z;
 
 		modelMatrix = glm::mat4(1);
 		modelMatrix *= Transform3D::Translate(-4.05f, 0, -0.15f + translateLeftLampsValues[i]);
@@ -1909,6 +1943,25 @@ void Tema3::Update(float deltaTimeSeconds)
 	CheckObstacleCollisions();
 	CheckCollectionItems();
 	LoadScoreInfo();
+	//pozitie "soare" -3.45f, 3.75f, -0.05f
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(-3.55f, 3.35, -0.05f),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[0]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[1]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[2]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[3]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[4]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[5]),
+		glm::vec3(3.65f, 2.0f, RightLampsPos[6]),
+
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[0]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[1]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[2]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[3]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[4]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[5]),
+		glm::vec3(-4.65f, 2.0f, LeftLampsPos[6])
+	};
 	//s-au irosit toate vietile
 	if (start == true) {
 		if (lives <= 0) {
@@ -1981,13 +2034,18 @@ void Tema3::Update(float deltaTimeSeconds)
 			}
 		}
 	}
-	// Render the camera target. Useful for understanding where is the rotation point in Third-person camera movement
 	if (renderCameraTarget) {
 		glm::mat4 modelMatrix = glm::mat4(1);
 		modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
 		RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
 	}
+	sunAngle += 0.5f * deltaTimeSeconds;
+	glm::mat4 modelMatrix = glm::mat4(1);
+	modelMatrix *= Transform3D::Translate(-3.55f, 3.35, -0.05f); //=point light position
+	modelMatrix *= Transform3D::RotateOY(sunAngle);
+	modelMatrix *= Transform3D::Scale(0.60, 0.60, 0.60);
+	RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(), mapTextures["sun"]);
 }
 
 void Tema3::FrameEnd()
