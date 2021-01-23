@@ -24,6 +24,7 @@ private:
 	Mesh* DefineBlackSquare();
 	Mesh* Tema3::CreateMesh(const char* name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned short>& indices);
 	Mesh* Tema3::CreateStar();
+	Mesh* Tema3::CreateSphere();
 	void LoadStars();
 	void LoadTextures();
 	void LoadMeshes();

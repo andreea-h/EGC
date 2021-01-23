@@ -236,6 +236,9 @@ void Tema3::LoadMeshes() {
 		}
 	}
 
+	Mesh* sfera = CreateSphere();
+	meshes[sfera->GetMeshID()] = sfera;
+
 }
 
 
@@ -313,6 +316,108 @@ Mesh* Tema3::CreatePyramid() {
 
 	meshes[piramida->GetMeshID()] = piramida;
 	return piramida;
+}
+
+Mesh* Tema3::CreateSphere() {
+	//creare sfera
+	
+		vector<glm::vec3> vertices_sfera;
+		vector<unsigned short> indices_sfera;
+		vector<glm::vec3> normals;
+		vector<glm::vec2> texCoords;
+
+		float pi = 2 * acos(0.0);
+		float nr_latitudinal = 15;
+		float nr_longitudinal = 50;
+
+		float v, u;
+		float x, y, z;		//(x, y, z) punct de pe sfera
+		float r = 0.5f;		//raza sferei
+
+		//coordonatele unui punct de pe sfera (x, y, z):
+		//z = r * sin (u)
+		//x = r * cos(v) * cos(u)
+		//y = r * sin(v) * cos(u)
+
+		//u - unghiul determinat de 2 puncte de pe sfera unite pe directie latitudinala
+		//v - unghiul determinat de 2 puncte de pe sfera unite pe directie longitudinala
+		float nx, ny, nz, lengthInv = 1.0f / r;    // vertex normal
+		float s, t;                                     // vertex texCoord
+
+		int i;
+		for (i = 0; i <= nr_latitudinal; i++) {
+			u = pi / 2 - (pi * i / nr_latitudinal);
+
+			for (int j = 0; j <= nr_longitudinal; j++) {
+				v = 2 * pi * j / nr_longitudinal;
+
+				x = r * cosf(u) * cosf(v);
+				y = r * cosf(u) * sinf(v);
+				z = r * sinf(u);
+
+				if (j % 2 == 0) {
+					vertices_sfera.push_back(glm::vec3(x, y, z)); 
+				}
+				else {
+					vertices_sfera.push_back(glm::vec3(x, y, z)); 
+				}
+
+				// normalized vertex normal (nx, ny, nz)
+				nx = x * lengthInv;
+				ny = y * lengthInv;
+				nz = z * lengthInv;
+				normals.push_back(glm::vec3(nx, ny, nz));
+
+				// vertex tex coord (s, t) range between [0, 1]
+				s = (float)j / nr_longitudinal;
+				t = (float)i / nr_latitudinal;
+				texCoords.push_back(glm::vec2(s, t));
+			}
+		}
+
+		int v1, v2, v3, v4;
+		for (int i = 0; i < nr_latitudinal; ++i)
+		{
+			v1 = i * (nr_longitudinal + 1);
+			v2 = v1 + nr_longitudinal + 1;
+			v3 = v1 + 1;
+			v4 = v2 + 1;
+			//intr-o portiune latitudinala identificata prin indexul i, sunt incluse cate
+			//2 triunghiuri pe sector londitudinal, cu exceptia celor de indice 0 si (nr_latitudinal - 1)
+			//care au doar un triunghi pe sector
+
+			for (int j = 0; j < nr_longitudinal; j++) {
+				if (i != 0 && i != (nr_latitudinal - 1)) {
+					indices_sfera.push_back(v1);
+					indices_sfera.push_back(v2);
+					indices_sfera.push_back(v3);
+
+					indices_sfera.push_back(v3);
+					indices_sfera.push_back(v2);
+					indices_sfera.push_back(v4);
+				}
+				else if (i == 0) {
+					indices_sfera.push_back(v3);
+					indices_sfera.push_back(v2);
+					indices_sfera.push_back(v4);
+				}
+				else {
+					indices_sfera.push_back(v1);
+					indices_sfera.push_back(v2);
+					indices_sfera.push_back(v3);
+				}
+				v1++;
+				v2++;
+				v3++;
+				v4++;
+			}
+		}
+
+		Mesh* sfera = new Mesh("sfera");	
+		sfera->InitFromData(vertices_sfera, normals, texCoords, indices_sfera);
+
+		meshes[sfera->GetMeshID()] = sfera;
+		return sfera;
 }
 
 Mesh* Tema3::CreateStylisedCube() {
@@ -2110,7 +2215,7 @@ void Tema3::Update(float deltaTimeSeconds)
 	modelMatrix *= Transform3D::Translate(-3.55f, 3.45, -0.05f); //=point light position
 	modelMatrix *= Transform3D::RotateOY(sunAngle);
 	modelMatrix *= Transform3D::Scale(0.60, 0.60, 0.60);
-	RenderSimpleMesh(meshes["sphere"], shaders["basicShader"], modelMatrix, glm::vec3(), mapTextures["sun"]);
+	RenderSimpleMesh(meshes["sfera"], shaders["basicShader"], modelMatrix, glm::vec3(), mapTextures["sun"]);
 }
 
 void Tema3::FrameEnd()
